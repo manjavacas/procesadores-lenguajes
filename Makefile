@@ -7,14 +7,17 @@ else
    endif
 endif
 
-all: jflex
+all: jflex java
 
 jflex: Gachaneitor.lex
 	jflex Gachaneitor.lex
 
 
-java: Yylex.java
-	javac -encoding utf8 Yylex.java
+java: gachaneitor.java
+	javac -encoding utf8 gachaneitor.java
+
+run: gachaneitor.class recipe.txt
+	java gachaneitor recipe.txt
 
 clean:
 	$(RM) *.java

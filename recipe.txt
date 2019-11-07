@@ -1,0 +1,20 @@
+menu merendola {
+    nombre: "Merienda estudiantil";
+    100g pan;
+    plato bocadilloChopped {
+        info {
+            nombre: "Bocadillo de Chopped";
+            usuario: NoamChomsky;
+            raciones: 1;
+            tiempo: 5m;
+            calorias: 44;
+            tipo: "Merienda";
+            cocina: "Española";
+        }
+        30g chopped;
+        anadir(chopped);
+        programar(37ºC, espiga, 00:05, inverso);
+        sacar("chopped caliente");
+        "introducir chopped caliente en pan cortado";
+    }
+}
