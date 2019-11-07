@@ -1,0 +1,37 @@
+<MENU> 		 ::= "menu" <ID> '{' <NOMBRE> {<INGREDIENTE>} <PLATO> {<PLATO>} '}'
+<PLATO> 	 ::= "plato" <ID> '{' <CABECERA> {<INGREDIENTE>} {<INSTRUCCION>} '}'
+
+<CABECERA> 	 ::= "info" '{' <NOMBRE> <USUARIO> <RACIONES> <TIEMPO_TOTAL> [<CALORIAS>] [<TIPO>] [<COCINA>] '}'
+<NOMBRE> 	 ::= "nombre" ':' <ID> ';'
+<USUARIO> 	 ::= "usuario" ':' <CADENA> ';' 
+<RACIONES> 	 ::= "raciones" ':' <NUMERO> ';'
+<TIEMPO_TOTAL> 	 ::= "tiempo" ':' <DURACION> ';' 
+<CALORIAS> 	 ::= "calorias" ':' <NUMERO> ';'
+<TIPO> 		 ::= "tipo" ':' <CADENA> ';'
+<COCINA> 	 ::= "cocina" ':' <CADENA> ';'
+
+<INSTRUCCION>  	 ::= (<PROGRAMAR> | <ANADIR> | <CALENTAR> | <REMOVER> | <ACCION_USUARIO> | <SACAR>) ';'
+<PROGRAMAR>   	 ::= "programar" '(' <TEMPERATURA> ',' <VELOCIDAD> ',' <TEMPORIZADOR> [',' "inverso"] ')'
+<CALENTAR>       ::= "calentar" '(' <TEMPERATURA> ',' <TEMPORIZADOR> ')'
+<REMOVER>        ::= "remover" '(' <VELOCIDAD> ',' <TEMPORIZADOR> [',' "inverso"] ')'
+<ACCION_USUARIO> ::= '"' <CADENA> '"'
+<ANADIR>         ::= "anadir" '(' (<INGREDIENTE> | <CADENA>) ')'
+<SACAR>          ::= "sacar" '(' <CADENA> ')'
+<TEMPERATURA>    ::= (<TEMP> | "varoma")
+<VELOCIDAD>      ::= (<NUMERO> | "cuchara" | "espiga" | "turbo")
+<INGREDIENTE>    ::= <CANTIDAD> <CADENA> ';'
+<CANTIDAD>       ::= (<NUMERO> ('l' | 'ml' | 'g' | 'cucharada' | 'ud') | "al_gusto")
+
+<ID>             ::= ('A' | ... | 'Z' | 'a' | ... | 'z') {('A' | ... | 'Z' | 'a' | ... | 'z'  | '0' | ... | '9')}
+<CADENA> 	 ::= '"' ('A' | ... | 'Z' | 'a' | ... | 'z' | '0' | ... | '9') {('A' | ... | 'Z' | 'a' | ... | 'z' | '0' | ... | '9' | <BLANCO>)} '"'
+
+<DURACION>       ::= [<NUMERO> 'h'] <NUMERO> 'm'
+<TEMPORIZADOR>   ::= <DIGITO> <DIGITO> ':' <DIGITO> <DIGITO>
+<TEMP>           ::= <NUMERO> 'ºC'
+<DIGITO>         ::= ('0' | ... | '9')
+<NUMERO>         ::= <DIGITO> {<DIGITO>}
+<BLANCO>         ::= (' ' | '\t' | '\n' | '\r')
+
+
+
+
