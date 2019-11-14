@@ -19,6 +19,9 @@ java: gachaneitor.java
 run: gachaneitor.class recipe.txt
 	java gachaneitor recipe.txt
 
+error: gachaneitor.class recipe-error.txt
+	java gachaneitor recipe-error.txt
+
 clean:
 	$(RM) *.java
 	$(RM) *~
