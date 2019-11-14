@@ -53,11 +53,11 @@ class Utils {
 
     /*** ERROR HANDLING ***/
     public enum Error {
-        LEX_ERR_COMMENT("comment"),
-        LEX_ERR_UNEXPECTED_PARENTHESIS("unexpected parenthesis"),
-        LEX_ERR_EXPECTED_PARENTHESIS("expected parenthesis"),
-        LEX_ERR_UNEXPECTED_BRACKET("unexpected bracket"),
-        LEX_ERR_EXPECTED_BRACKET("excpected bracket");
+        COMMENT_END_EXPECTED("comment"),
+        PARENTHESIS_UNEXPECTED("unexpected parenthesis"),
+        PARENTHESIS_EXPECTED("expected parenthesis"),
+        BRACKET_UNEXPECTED("unexpected bracket"),
+        BRACKET_EXPECTED("excpected bracket");
 
 
         String message;
@@ -116,7 +116,7 @@ class Utils {
 
 %eof{
     if(!balance.empty()) {
-        Utils.addError(Utils.Error.LEX_ERR_EXPECTED_BRACKET, yyline, yycolumn);
+        Utils.addError(Utils.Error.BRACKET_EXPECTED, yyline, yycolumn);
     }
     Utils.printErrors();
 %eof}
@@ -140,12 +140,12 @@ TAB =  \t
     \)      { 
                 System.out.print("<)> ");
                 if(balance.empty())
-                    Utils.addError(Utils.Error.LEX_ERR_UNEXPECTED_PARENTHESIS, yyline, yycolumn);
+                    Utils.addError(Utils.Error.PARENTHESIS_UNEXPECTED, yyline, yycolumn);
                 else {
                     char c = balance.pop();
                     if(c == '{') {
                         /* ERROR */
-                        Utils.addError(Utils.Error.LEX_ERR_EXPECTED_BRACKET, yyline, yycolumn);
+                        Utils.addError(Utils.Error.BRACKET_EXPECTED, yyline, yycolumn);
                     }
                 }
             }
@@ -153,11 +153,11 @@ TAB =  \t
     \}      { 
                 System.out.print("<}> ");
                 if(balance.empty())
-                    Utils.addError(Utils.Error.LEX_ERR_UNEXPECTED_BRACKET, yyline, yycolumn);
+                    Utils.addError(Utils.Error.BRACKET_UNEXPECTED, yyline, yycolumn);
                 else {
                     char c = balance.pop();
                     if(c == '(') {
-                        Utils.addError(Utils.Error.LEX_ERR_EXPECTED_PARENTHESIS, yyline, yycolumn);
+                        Utils.addError(Utils.Error.PARENTHESIS_EXPECTED, yyline, yycolumn);
                     }
                 }
             }
@@ -165,7 +165,7 @@ TAB =  \t
     ;       {
                 System.out.print("<;> ");
                 if(balance.peek() == '(') {
-                    Utils.addError(Utils.Error.LEX_ERR_EXPECTED_PARENTHESIS, yyline, yycolumn);
+                    Utils.addError(Utils.Error.PARENTHESIS_EXPECTED, yyline, yycolumn);
                     while(balance.peek() == '(') balance.pop();
                 }
             }
