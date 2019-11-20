@@ -1,4 +1,4 @@
-menu merendola {
+menu myMerendola {
     nombre: "Merienda estudiantil";
     100g pan;
     plato bocadilloChopped {
