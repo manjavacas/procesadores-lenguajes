@@ -53,11 +53,11 @@ class Utils {
 
     /*** ERROR HANDLING ***/
     public enum Error {
-        COMMENT_END_EXPECTED("comment"),
-        PARENTHESIS_UNEXPECTED("unexpected parenthesis"),
-        PARENTHESIS_EXPECTED("expected parenthesis"),
-        BRACKET_UNEXPECTED("unexpected bracket"),
-        BRACKET_EXPECTED("excpected bracket");
+        ILLEGAL("Error: Illegal character '%s' at %d:%d\n"),
+        INVALID_TIMER("Error: Invalid timer format '%s' at %d:%d\n"),
+        STRING_END_EXPECTED("Error: %sUnclosed string starting at %d:%d\n"),
+        COMMENT_START_EXPECTED("Error: %sUnexpected end of comment at %d:%d\n"),
+        COMMENT_END_EXPECTED("Error: %sUnclosed comment starting at %d:%d\n");
 
 
         String message;
@@ -70,27 +70,15 @@ class Utils {
         }
     }
 
-    private static class LocatedError {
-        public Error error;
-        public int line, column;
-        public LocatedError(Error error, int line, int column) {
-            this.error = error;
-            this.line = line;
-            this.column = column;
-        }
+    public static void error(Error e, String content, int l, int c) {
+        System.out.printf(e.toString(), content != null ? content : "", l+1, c+1);
     }
 
-    private static ArrayList<LocatedError> errors = new ArrayList<>();
-    public static void addError(Error e, int l, int c) {
-        errors.add(new LocatedError(e, l+1, c+1));
+    /** DEBUG **/
+    public static void debugLog(String debug) {
+        System.out.print(debug);
     }
-    public static void printErrors() {
-        System.out.println();
-        for(LocatedError e : errors)
-            System.out.printf("Error: %s (line: %d, column: %d)\n",
-                e.error.toString(),
-                e.line, e.column);
-    }
+    /** DEBUG **/
 }
 
 
@@ -104,22 +92,16 @@ class Utils {
 %column
 
 /* ------------ ESTADOS ------------*/
-%state CADENA
-%state COMENTARIO
+%state STRING
+%state COMMENT
 
 
 /* -------- DECLARACIONES --------- */
 %{
     private StringBuilder cadena = new StringBuilder();
-    private Stack<Character> balance = new Stack<>();
+    private int initLine = -1, initColumn = -1;
 %}
 
-%eof{
-    if(!balance.empty()) {
-        Utils.addError(Utils.Error.BRACKET_EXPECTED, yyline, yycolumn);
-    }
-    Utils.printErrors();
-%eof}
 
 NL  = \n | \r | \r\n
 BLANCO = " "
@@ -130,72 +112,48 @@ TAB =  \t
     // ID o PalabraReservada
     [:jletter:][:jletterdigit:]*    {
             if(Utils.isKeyword(yytext()))
-                System.out.print(Utils.getToken(yytext()));
+                Utils.debugLog(Utils.getToken(yytext()));
             else
-                System.out.print("<ID>[" + yytext() + "] ");
+                Utils.debugLog("<ID>[" + yytext() + "] ");
         }
 
-    :       { System.out.print("<:> "); }
-    \(      { System.out.print("<(> "); balance.push('('); }
-    \)      { 
-                System.out.print("<)> ");
-                if(balance.empty())
-                    Utils.addError(Utils.Error.PARENTHESIS_UNEXPECTED, yyline, yycolumn);
-                else {
-                    char c = balance.pop();
-                    if(c == '{') {
-                        /* ERROR */
-                        Utils.addError(Utils.Error.BRACKET_EXPECTED, yyline, yycolumn);
-                    }
-                }
-            }
-    \{      { System.out.print("<{> "); balance.push('{'); }
-    \}      { 
-                System.out.print("<}> ");
-                if(balance.empty())
-                    Utils.addError(Utils.Error.BRACKET_UNEXPECTED, yyline, yycolumn);
-                else {
-                    char c = balance.pop();
-                    if(c == '(') {
-                        Utils.addError(Utils.Error.PARENTHESIS_EXPECTED, yyline, yycolumn);
-                    }
-                }
-            }
-    ,       { System.out.print("<,> "); }
-    ;       {
-                System.out.print("<;> ");
-                if(balance.peek() == '(') {
-                    Utils.addError(Utils.Error.PARENTHESIS_EXPECTED, yyline, yycolumn);
-                    while(balance.peek() == '(') balance.pop();
-                }
-            }
-    ([:digit:]+h)?[:digit:]+m               { System.out.print("<DURACION>[" + yytext() + "] "); }
-    [:digit:]+(°|º)?C                       { System.out.print("<TEMP>[" + yytext() + "] "); }
-    [:digit:][:digit:]:[:digit:][:digit:]   { System.out.print("<TEMPORIZADOR>[" + yytext() + "] "); }
-    [:digit:]+                              { System.out.print("<NUMERO>[" + yytext() + "] "); }
+    :       { Utils.debugLog("<:> "); }
+    \(      { Utils.debugLog("<(> "); }
+    \)      { Utils.debugLog("<)> "); }
+    \{      { Utils.debugLog("<{> "); }
+    \}      { Utils.debugLog("<}> "); }
+    ,       { Utils.debugLog("<,> "); }
+    ;       { Utils.debugLog("<;> "); }
+    ([:digit:]+h)?[:digit:]+m               { Utils.debugLog("<DURACION>[" + yytext() + "] "); }
+    [:digit:]+(°|º)?C                       { Utils.debugLog("<TEMP>[" + yytext() + "] "); }
+    [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); }
+    [:digit:]*:[:digit:]*                   { Utils.error(Utils.Error.INVALID_TIMER, yytext(), yyline, yycolumn); }
+    [:digit:]+                              { Utils.debugLog("<NUMERO>[" + yytext() + "] "); }
 
     // Limpiamos el buffer de la cadena y cambiamos de estado
-    \"  { cadena.setLength(0); yybegin(CADENA); }
+    \"  { cadena.setLength(0); initLine = yyline; initColumn = yycolumn; yybegin(STRING); }
 
     // Comentarios
     "//".*{NL}      { /* (one line comment) ignore */ }
-    "/*"        { yybegin(COMENTARIO); }
+    "/*"        { initLine = yyline; initColumn = yycolumn; yybegin(COMMENT); }
+    "*/"        { Utils.error(Utils.Error.COMMENT_START_EXPECTED, null, yyline, yycolumn); }
 
-    {NL}				{/* ignore */ /**DEBUG**/System.out.println();/**DEBUG**/}
+    {NL}				{/* ignore */ /**DEBUG**/Utils.debugLog("\n");/**DEBUG**/}
     {TAB}				{/* ignore */}
     {BLANCO}			{/* ignore */}
-    . { System.out.println("<ILLEGAL_CHARACTER>[" + yytext() + "] "); }
+    . { Utils.error(Utils.Error.ILLEGAL, yytext(), yyline, yycolumn); }
 }
 
-<CADENA> {
-    \"  { System.out.print("<CADENA>[" + cadena.toString() + "] "); yybegin(YYINITIAL);  }
+<STRING> {
+    \"  { Utils.debugLog("<CADENA>[" + cadena.toString() + "] "); yybegin(YYINITIAL);  }
     .   { cadena.append(yytext()); }
-    <<EOF>>    {/* ERROR */ return YYEOF;}
+    \n  { cadena.append(yytext()); }
+    <<EOF>>    { Utils.error(Utils.Error.STRING_END_EXPECTED, null, initLine, initColumn); return YYEOF; }
 }
 
-<COMENTARIO> {
+<COMMENT> {
     "*/"    { yybegin(YYINITIAL); }
     .       {/* ignore */}
     \n      {/* ignore */}
-    <<EOF>> {/* ERROR */ return YYEOF;}
+    <<EOF>> { Utils.error(Utils.Error.COMMENT_END_EXPECTED, null, initLine, initColumn); return YYEOF; }
 }

@@ -2,6 +2,7 @@ menu merendola {
     nombre: "Merienda estudiantil";
     100g pan;
     plato bocadilloChopped {
+        */
         info {
             nombre: "Bocadillo de Chopped";
             usuario: NoamChomsky;
@@ -17,8 +18,9 @@ menu merendola {
             si no lo añades, no funciona
         */
         anadir(/* chopped de buena calidad */chopped);
-        programar(37ºC, espiga, 00:05, inverso};
+        programar(37ºC, espiga, 0:05, inverso};
+        ?
         sacar("chopped caliente");
-        "introducir chopped caliente en pan cortado";
+        "introducir chopped caliente en pan cortado;
     
 }
