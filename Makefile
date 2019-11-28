@@ -1,28 +1,34 @@
 
 ifdef OS
    RM = del /Q
+   BUILD_DIR = .\build
+   OS_SEP = \\
 else
    ifeq ($(shell uname), Linux)
       RM = rm -f
+	  BUILD_DIR = ./build
+	  OS_SEP = /
    endif
 endif
 
 all: jflex java
 
-jflex: Gachaneitor.lex
-	jflex Gachaneitor.lex
+builddir:
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
+jflex: builddir Gachaneitor.lex
+	jflex -d $(BUILD_DIR) Gachaneitor.lex
 
-java: gachaneitor.java
-	javac -encoding utf8 gachaneitor.java
+java: builddir $(BUILD_DIR)$(OS_SEP)gachaneitor.java
+	javac -d $(BUILD_DIR) -encoding utf8 "$(BUILD_DIR)$(OS_SEP)gachaneitor.java"
 
-run: gachaneitor.class recipe.txt
-	java gachaneitor recipe.txt
+run: $(BUILD_DIR)$(OS_SEP)gachaneitor.class recipe.txt
+	@java -cp "$(CLASSPATH);$(BUILD_DIR)" gachaneitor recipe.txt
 
-error: gachaneitor.class recipe-error.txt
-	java gachaneitor recipe-error.txt
+error: $(BUILD_DIR)$(OS_SEP)gachaneitor.class recipe-error.txt
+	@java -cp "$(CLASSPATH);$(BUILD_DIR)" gachaneitor recipe-error.txt
 
 clean:
-	$(RM) *.java
-	$(RM) *~
-	$(RM) *.class
+	$(RM) $(BUILD_DIR)$(OS_SEP)*.java
+	$(RM) $(BUILD_DIR)$(OS_SEP)*~
+	$(RM) $(BUILD_DIR)$(OS_SEP)*.class
