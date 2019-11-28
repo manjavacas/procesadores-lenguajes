@@ -7,6 +7,8 @@
 /*     Velasco Mata, Alberto       */
 /***********************************/
 
+import java_cup.runtime.Symbol;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -90,6 +92,8 @@ class Utils {
 
 %line
 %column
+
+%cup
 
 /* ------------ ESTADOS ------------*/
 %state STRING

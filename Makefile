@@ -11,7 +11,8 @@ else
    endif
 endif
 
-all: jflex java
+
+all: jflex cup java
 
 builddir:
 	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
@@ -19,14 +20,19 @@ builddir:
 jflex: builddir Gachaneitor.lex
 	jflex -d $(BUILD_DIR) Gachaneitor.lex
 
-java: builddir $(BUILD_DIR)$(OS_SEP)gachaneitor.java
-	javac -d $(BUILD_DIR) -encoding utf8 "$(BUILD_DIR)$(OS_SEP)gachaneitor.java"
+cup: builddir Gachaneitor.cup
+	cup -destdir $(BUILD_DIR) Gachaneitor.cup
 
-run: $(BUILD_DIR)$(OS_SEP)gachaneitor.class recipe.txt
+java: builddir $(BUILD_DIR)$(OS_SEP)gachaneitor.java $(BUILD_DIR)$(OS_SEP)parser.java $(BUILD_DIR)$(OS_SEP)sym.java
+	javac -d $(BUILD_DIR) -encoding utf8 "$(BUILD_DIR)$(OS_SEP)gachaneitor.java" "$(BUILD_DIR)$(OS_SEP)parser.java" "$(BUILD_DIR)$(OS_SEP)sym.java"
+
+
+run: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor.class $(BUILD_DIR)$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)sym.class
 	@java -cp "$(CLASSPATH);$(BUILD_DIR)" gachaneitor recipe.txt
 
-error: $(BUILD_DIR)$(OS_SEP)gachaneitor.class recipe-error.txt
+error: recipe-error.txt $(BUILD_DIR)$(OS_SEP)gachaneitor.class $(BUILD_DIR)$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)sym.class
 	@java -cp "$(CLASSPATH);$(BUILD_DIR)" gachaneitor recipe-error.txt
+
 
 clean:
 	$(RM) $(BUILD_DIR)$(OS_SEP)*.java

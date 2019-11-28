@@ -1,0 +1,20 @@
+
+import java_cup.runtime.*;
+
+/* ---------------------- User code ---------------------- */
+
+
+/* ------------------- Grammar Symbols ------------------- */
+
+terminal MENU;
+terminal String STRING;
+
+non terminal menu;
+
+
+/* --------------------- Precedences --------------------- */
+
+
+/* ----------------------- Grammar ----------------------- */
+
+menu    ::= MENU;
