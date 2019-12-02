@@ -1,12 +1,35 @@
+package gachaneitor;
+
 
 import java_cup.runtime.*;
+import java.io.*;
+
+//class GachaneitorParser;
 
 /* ---------------------- User code ---------------------- */
-
+parser code {:
+	public static void main(String[] args) throws Exception {
+		FileInputStream file = new FileInputStream(args[0]);
+		try {
+			Reader reader = new InputStreamReader(file);
+			new parser(new Lexer(reader)).parse();
+			reader.close();
+		}
+		catch (Exception e) {
+			System.out.println("Análisis INCORRECTO!!");
+			System.exit(1);
+        }
+		System.out.println("Análisis Correcto");
+ 	}
+:}
 
 /* ------------------- Grammar Symbols ------------------- */
 
-terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma, duracion, temp, timer, number, id, string, menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina, programar, inverso, calentar, remover, anadir, sacar, varoma, velocidad, medida, al_gusto;
+terminal    paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
+            duracion, temp, timer, number, id, string,
+            menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
+            programar, calentar, remover, anadir, sacar,
+            varoma, velocidad, inverso, medida, al_gusto;
 non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA, NOMBRE, USUARIO, RACIONES, TIEMPO_TOTAL, CALORIAS, TIPO, COCINA, INSTRUCCION, PROGRAMAR, INVERSO, CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR, TEMPERATURA, VELOCIDAD, INGREDIENTE, CANTIDAD;
 
 
@@ -28,14 +51,14 @@ USUARIO ::= usuario dos_puntos id punto_coma;
 RACIONES ::= raciones dos_puntos number punto_coma;
 TIEMPO_TOTAL ::= tiempo dos_puntos duracion punto_coma;
 CALORIAS ::= calorias dos_puntos number punto_coma | ;
-TIPO ::= tipo dos_puntos string dos_puntos | ;
-COCINA ::= cocina dos_puntos string dos_puntos | ;
+TIPO ::= tipo dos_puntos string punto_coma | ;
+COCINA ::= cocina dos_puntos string punto_coma | ;
 
 INSTRUCCION ::= PROGRAMAR punto_coma | ANADIR punto_coma | CALENTAR punto_coma | REMOVER punto_coma | ACCION_USUARIO punto_coma | SACAR punto_coma;
 PROGRAMAR ::= programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der;
 INVERSO ::= coma inverso | ;
-ANADIR ::= anadir paren_izq INGREDIENTE paren_der | anadir paren_izq string paren_der;
-INGREDIENTE ::= CANTIDAD string;
+ANADIR ::= anadir paren_izq id paren_der | anadir paren_izq string paren_der;
+INGREDIENTE ::= CANTIDAD id;
 CANTIDAD ::= al_gusto | number medida;
 CALENTAR ::= calentar paren_izq TEMPERATURA coma timer paren_der;
 TEMPERATURA ::= temp | varoma;
