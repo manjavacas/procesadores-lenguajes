@@ -6,10 +6,8 @@ import java_cup.runtime.*;
 
 /* ------------------- Grammar Symbols ------------------- */
 
-terminal MENU;
-terminal String STRING;
-
-non terminal menu;
+terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma, duracion, temp, timer, number, id, string, menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina, programar, inverso, calentar, remover, anadir, sacar, varoma, velocidad, medida, al_gusto;
+non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA, NOMBRE, USUARIO, RACIONES, TIEMPO_TOTAL, CALORIAS, TIPO, COCINA, INSTRUCCION, PROGRAMAR, INVERSO, CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR, TEMPERATURA, VELOCIDAD, INGREDIENTE, CANTIDAD;
 
 
 /* --------------------- Precedences --------------------- */
@@ -17,4 +15,34 @@ non terminal menu;
 
 /* ----------------------- Grammar ----------------------- */
 
-menu    ::= MENU;
+MENU    ::= menu id llave_izq NOMBRE LISTA_INGREDIENTES LISTA_PLATOS llave_der;
+LISTA_INGREDIENTES ::= INGREDIENTE punto_coma LISTA_INGREDIENTES | ;
+LISTA_PLATOS ::= PLATO LISTA_PLATOS | PLATO;
+
+PLATO ::= plato id llave_izq CABECERA LISTA_INGREDIENTES LISTA_INSTRUCCIONES llave_der;
+LISTA_INSTRUCCIONES ::= INSTRUCCION LISTA_INSTRUCCIONES | ;
+
+CABECERA ::= info llave_izq NOMBRE USUARIO RACIONES TIEMPO_TOTAL CALORIAS TIPO COCINA llave_der;
+NOMBRE ::= nombre dos_puntos string punto_coma;
+USUARIO ::= usuario dos_puntos id punto_coma;
+RACIONES ::= raciones dos_puntos number punto_coma;
+TIEMPO_TOTAL ::= tiempo dos_puntos duracion punto_coma;
+CALORIAS ::= calorias dos_puntos number punto_coma | ;
+TIPO ::= tipo dos_puntos string dos_puntos | ;
+COCINA ::= cocina dos_puntos string dos_puntos | ;
+
+INSTRUCCION ::= PROGRAMAR punto_coma | ANADIR punto_coma | CALENTAR punto_coma | REMOVER punto_coma | ACCION_USUARIO punto_coma | SACAR punto_coma;
+PROGRAMAR ::= programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der;
+INVERSO ::= coma inverso | ;
+ANADIR ::= anadir paren_izq INGREDIENTE paren_der | anadir paren_izq string paren_der;
+INGREDIENTE ::= CANTIDAD string;
+CANTIDAD ::= al_gusto | number medida;
+CALENTAR ::= calentar paren_izq TEMPERATURA coma timer paren_der;
+TEMPERATURA ::= temp | varoma;
+REMOVER ::= remover paren_izq VELOCIDAD coma timer INVERSO paren_der;
+VELOCIDAD ::= number | velocidad;
+ACCION_USUARIO ::= string;
+SACAR ::= sacar paren_izq string paren_der;
+
+
+
