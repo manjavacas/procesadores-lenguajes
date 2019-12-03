@@ -2,8 +2,8 @@
 <PLATO> 	 ::= "plato" <ID> '{' <CABECERA> {<INGREDIENTE>} {<INSTRUCCION>} '}'
 
 <CABECERA> 	 ::= "info" '{' <NOMBRE> <USUARIO> <RACIONES> <TIEMPO_TOTAL> [<CALORIAS>] [<TIPO>] [<COCINA>] '}'
-<NOMBRE> 	 ::= "nombre" ':' <ID> ';'
-<USUARIO> 	 ::= "usuario" ':' <CADENA> ';' 
+<NOMBRE> 	 ::= "nombre" ':' <CADENA> ';'
+<USUARIO> 	 ::= "usuario" ':' <ID> ';' 
 <RACIONES> 	 ::= "raciones" ':' <NUMERO> ';'
 <TIEMPO_TOTAL> 	 ::= "tiempo" ':' <DURACION> ';' 
 <CALORIAS> 	 ::= "calorias" ':' <NUMERO> ';'
