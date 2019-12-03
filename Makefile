@@ -26,7 +26,6 @@ cup: builddir Gachaneitor.cup
 java: builddir $(BUILD_DIR)$(OS_SEP)Lexer.java $(BUILD_DIR)$(OS_SEP)parser.java $(BUILD_DIR)$(OS_SEP)sym.java
 	javac -d $(BUILD_DIR) -encoding utf8 "$(BUILD_DIR)$(OS_SEP)Lexer.java" "$(BUILD_DIR)$(OS_SEP)parser.java" "$(BUILD_DIR)$(OS_SEP)sym.java"
 
-
 run-lexer: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
 	@java -cp "$(CLASSPATH);$(BUILD_DIR)" gachaneitor.Lexer recipe.txt
 

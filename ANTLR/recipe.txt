@@ -1,0 +1,24 @@
+menu myMerendola {
+    nombre: "Merienda estudiantil";
+    100g pan;
+    plato bocadilloChopped {
+        info {
+            nombre: "Bocadillo de Chopped";
+            usuario: NoamChomsky;
+            raciones: 1;
+            tiempo: 5m;
+            calorias: 44;
+            tipo: "Merienda";
+            cocina: "Espanola";
+        }
+        // El chopped es muy importante en esta receta
+        30g chopped;
+        /* Hay que anadirlo
+            si no lo anades, no funciona
+        */
+        anadir(/* chopped de buena calidad */chopped);
+        programar(37C, espiga, 00:05, inverso);
+        sacar("chopped caliente");
+        "introducir chopped caliente en pan cortado";
+    }
+}
