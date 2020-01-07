@@ -15,7 +15,11 @@ endif
 all: jflex cup java
 
 builddir:
-	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+ifdef OS
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)";
+else
+	if [ ! -d "$(BUILD_DIR)" ]; then mkdir "$(BUILD_DIR)"; fi
+endif
 
 jflex: builddir Gachaneitor.lex
 	jflex -d $(BUILD_DIR) Gachaneitor.lex
