@@ -1,0 +1,4 @@
+add("chopped")
+program(37, -2, 5, true)
+take("chopped caliente")
+useraction("Introduce el chopped caliente en el pan cortado")

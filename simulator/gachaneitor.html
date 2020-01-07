@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Gachaneitor Simulator</title>
+        <script src="gachaneitor.js"></script>
+        <style>
+            html, body {
+                margin: 0;
+                height: 100%;
+            }
+            #gachaneitor-button {
+                background: #4d4d4d;
+                position: absolute;
+                border-radius: 50%;
+                left: 596px;
+                top:580px;
+                width:92px;
+                height:92px
+            }
+        </style>
+    </head>
+    <body onload="setup()">
+        <canvas id="gachaneitor" width="800" height="800" style="background:white">
+            Canvas tag not supported
+        </canvas>
+        <input id="gachacode-file" type="file" accept=".gachacode" style="visibility:hidden" />
+        <button onclick="loadGachacode()" id="gachaneitor-button"></button>
+    </body>
+</html>
