@@ -1,14 +1,13 @@
-package gachaneitor;
-
 
 import java_cup.runtime.*;
 import java.io.*;
 
-//class GachaneitorParser;
+// class GachaneitorParser;
 
 /* ---------------------- User code ---------------------- */
 parser code {:
-	public static void main(String[] args) throws Exception {
+	
+    public static void main(String[] args) throws Exception {
 		FileInputStream file = new FileInputStream(args[0]);
 		try {
 			Reader reader = new InputStreamReader(file);
@@ -16,56 +15,125 @@ parser code {:
 			reader.close();
 		}
 		catch (Exception e) {
-			System.out.println("Análisis INCORRECTO!!");
+			System.out.println("Analysis error");
 			System.exit(1);
         }
-		System.out.println("Análisis Correcto");
+		System.out.println("Analysis completed!");
  	}
+
+    @Override
+	public void report_error(String message, Object info) {
+        System.err.println("Syntax error in line " + (cur_token.left + 1) + ", column " + (cur_token.right + 1) + ": " + message);
+    }
+
+    @Override
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+    @Override
+    public void syntax_error(Symbol cur_token) {}
+
 :}
 
 /* ------------------- Grammar Symbols ------------------- */
 
-terminal    paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
-            duracion, temp, timer, number, id, string,
-            menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
-            programar, calentar, remover, anadir, sacar,
-            varoma, velocidad, inverso, medida, al_gusto;
-non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA, NOMBRE, USUARIO, RACIONES, TIEMPO_TOTAL, CALORIAS, TIPO, COCINA, INSTRUCCION, PROGRAMAR, INVERSO, CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR, TEMPERATURA, VELOCIDAD, INGREDIENTE, CANTIDAD;
+terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
+        duracion, temp, timer, number, id, string,
+        menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
+        programar, calentar, remover, anadir, sacar,
+        varoma, velocidad, inverso, medida, al_gusto;
 
+non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA,
+        NOMBRE, USUARIO, RACIONES, TIEMPO_TOTAL, CALORIAS, TIPO, COCINA, INSTRUCCION, PROGRAMAR,
+        INVERSO, CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR, TEMPERATURA, VELOCIDAD, INGREDIENTE, CANTIDAD;
 
 /* --------------------- Precedences --------------------- */
 
 
 /* ----------------------- Grammar ----------------------- */
 
-MENU    ::= menu id llave_izq NOMBRE LISTA_INGREDIENTES LISTA_PLATOS llave_der;
+MENU ::= menu id llave_izq NOMBRE LISTA_INGREDIENTES LISTA_PLATOS llave_der;
+
 LISTA_INGREDIENTES ::= INGREDIENTE punto_coma LISTA_INGREDIENTES | ;
 LISTA_PLATOS ::= PLATO LISTA_PLATOS | PLATO;
 
 PLATO ::= plato id llave_izq CABECERA LISTA_INGREDIENTES LISTA_INSTRUCCIONES llave_der;
+
 LISTA_INSTRUCCIONES ::= INSTRUCCION LISTA_INSTRUCCIONES | ;
 
 CABECERA ::= info llave_izq NOMBRE USUARIO RACIONES TIEMPO_TOTAL CALORIAS TIPO COCINA llave_der;
-NOMBRE ::= nombre dos_puntos string punto_coma;
-USUARIO ::= usuario dos_puntos id punto_coma;
-RACIONES ::= raciones dos_puntos number punto_coma;
-TIEMPO_TOTAL ::= tiempo dos_puntos duracion punto_coma;
-CALORIAS ::= calorias dos_puntos number punto_coma | ;
-TIPO ::= tipo dos_puntos string punto_coma | ;
-COCINA ::= cocina dos_puntos string punto_coma | ;
 
-INSTRUCCION ::= PROGRAMAR punto_coma | ANADIR punto_coma | CALENTAR punto_coma | REMOVER punto_coma | ACCION_USUARIO punto_coma | SACAR punto_coma;
-PROGRAMAR ::= programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der;
+NOMBRE ::= nombre dos_puntos string punto_coma 
+    | nombre dos_puntos string error {:parser.report_error("expected ';'", null);:}
+    | nombre string error {:parser.report_error("expected ':'", null);:} punto_coma;
+
+USUARIO ::= usuario dos_puntos id punto_coma 
+    | usuario dos_puntos id error {:parser.report_error("expected ';'", null);:}
+    | usuario error {:parser.report_error("expected ':'", null);:} id punto_coma ;
+
+RACIONES ::= raciones dos_puntos number punto_coma 
+    | raciones dos_puntos number error {:parser.report_error("expected ';'", null);:}
+    | raciones error {:parser.report_error("expected ':'", null);:} number punto_coma;
+
+TIEMPO_TOTAL ::= tiempo dos_puntos duracion punto_coma 
+    | tiempo dos_puntos duracion error {:parser.report_error("expected ';'", null);:}
+    | tiempo error {:parser.report_error("expected ':'", null);:} duracion punto_coma;
+
+CALORIAS ::= calorias dos_puntos number punto_coma 
+    | calorias dos_puntos number error {:parser.report_error("expected ';'", null);:}
+    | calorias error {:parser.report_error("expected ':'", null);:} number punto_coma
+    | ;
+
+TIPO ::= tipo dos_puntos string punto_coma 
+    | tipo dos_puntos string error {:parser.report_error("expected ';'", null);:}
+    | tipo error {:parser.report_error("expected ':'", null);:} string punto_coma 
+    | ;
+
+COCINA ::= cocina dos_puntos string punto_coma 
+    | cocina dos_puntos string error {:parser.report_error("expected ';'", null);:}
+    | cocina error {:parser.report_error("expected ':'", null);:} string punto_coma
+    | ;
+
+INSTRUCCION ::= PROGRAMAR | ANADIR | CALENTAR | REMOVER | ACCION_USUARIO | SACAR;
+
+PROGRAMAR ::= programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der punto_coma
+    | programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der error {:parser.report_error("expected ';'", null);:}
+    | programar error {:parser.report_error("expected '('", null);:} TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der punto_coma
+    | programar paren_izq TEMPERATURA error {:parser.report_error("expected ','", null);:} VELOCIDAD coma timer INVERSO paren_der punto_coma
+    | programar paren_izq TEMPERATURA coma VELOCIDAD error {:parser.report_error("expected ','", null);:} timer INVERSO paren_der punto_coma
+    | programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO error {:parser.report_error("expected ')'", null);:} punto_coma;
+
+ANADIR ::= anadir paren_izq id paren_der punto_coma | anadir paren_izq string paren_der punto_coma
+    | anadir paren_izq id paren_der error {:parser.report_error("expected ';'", null);:}
+    | anadir paren_izq string paren_der error {:parser.report_error("expected ';'", null);:}
+    | anadir error {:parser.report_error("expected '('", null);:} id paren_der punto_coma
+    | anadir paren_izq id error {:parser.report_error("expected ')'", null);:} punto_coma
+    | anadir error {:parser.report_error("expected '('", null);:} string paren_der punto_coma
+    | anadir paren_izq string error {:parser.report_error("expected ')'", null);:} punto_coma;
+
+CALENTAR ::= calentar paren_izq TEMPERATURA coma timer paren_der punto_coma
+    | calentar paren_izq TEMPERATURA coma timer paren_der error {:parser.report_error("expected ';'", null);:}
+    | calentar error {:parser.report_error("expected '('", null);:} TEMPERATURA coma timer paren_der punto_coma
+    | calentar paren_izq TEMPERATURA coma timer error {:parser.report_error("expected ')'", null);:} punto_coma;
+
+REMOVER ::= remover paren_izq VELOCIDAD coma timer INVERSO paren_der punto_coma
+    | remover paren_izq VELOCIDAD coma timer INVERSO paren_der error {:parser.report_error("expected ';'", null);:}
+    | remover paren_izq VELOCIDAD error {:parser.report_error("expected ','", null);:} timer INVERSO paren_der punto_coma
+    | remover error {:parser.report_error("expected '('", null);:} VELOCIDAD coma timer INVERSO paren_der punto_coma
+    | remover paren_izq VELOCIDAD coma timer INVERSO error {:parser.report_error("expected ')'", null);:} punto_coma;
+
+ACCION_USUARIO ::= string punto_coma 
+    | string error {:parser.report_error("expected ';'", null);:};
+
+SACAR ::= sacar paren_izq string paren_der punto_coma
+    | sacar paren_izq string paren_der error {:parser.report_error("expected ';'", null);:}
+    | sacar error {:parser.report_error("expected '('", null);:} string paren_der punto_coma
+    | sacar paren_izq string error {:parser.report_error("expected ')'", null);:} punto_coma;
+
 INVERSO ::= coma inverso | ;
-ANADIR ::= anadir paren_izq id paren_der | anadir paren_izq string paren_der;
 INGREDIENTE ::= CANTIDAD id;
 CANTIDAD ::= al_gusto | number medida;
-CALENTAR ::= calentar paren_izq TEMPERATURA coma timer paren_der;
 TEMPERATURA ::= temp | varoma;
-REMOVER ::= remover paren_izq VELOCIDAD coma timer INVERSO paren_der;
 VELOCIDAD ::= number | velocidad;
-ACCION_USUARIO ::= string;
-SACAR ::= sacar paren_izq string paren_der;
-
-
-
