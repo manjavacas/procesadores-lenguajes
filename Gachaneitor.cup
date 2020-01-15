@@ -10,6 +10,8 @@ import java.util.ArrayList;
 /* ---------------------- User code ---------------------- */
 parser code {:
     public static BufferedWriter writer;
+    public static boolean error;
+
     public static ArrayList<Ingredient> listaIngredientes;
     public static ArrayList<String> listaIds;
 	
@@ -21,6 +23,8 @@ parser code {:
 
         listaIngredientes = new ArrayList<Ingredient>();
         listaIds = new ArrayList<String>();
+
+        error = false;
 
 		try {
 			Reader reader = new InputStreamReader(file);
@@ -39,11 +43,17 @@ parser code {:
         }
 
         writer.close();
+        if(error) {
+            File targetFile = new File(targetName);
+            targetFile.delete();
+        }
+        
 		System.out.println("Analysis completed!");
  	}
 
     @Override
 	public void report_error(String message, Object info) {
+        error = true;
         System.err.println("Syntax error in line " + (cur_token.left + 1) + ", column " + (cur_token.right + 1) + ": " + message);
     }
 
@@ -70,16 +80,8 @@ parser code {:
             return this.name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public Ammount getAmmount() {
             return this.ammount;
-        }
-
-        public void setAmmount(Ammount ammount) {
-            this.ammount = ammount;
         }
 
         public boolean reduce(Ingredient ingre) {
@@ -138,8 +140,7 @@ terminal String string, id, velocidad, medida;
 terminal Integer temp, number, timer, duracion;
 terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
         menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
-        programar, calentar, remover, anadir, sacar,
-        varoma, inverso, al_gusto;
+        programar, calentar, remover, anadir, sacar, varoma, inverso, al_gusto;
 
 non terminal Integer TEMPERATURA, VELOCIDAD, RACIONES, TIEMPO_TOTAL, CALORIAS;
 non terminal Boolean INVERSO;
@@ -147,8 +148,7 @@ non terminal Ammount CANTIDAD;
 non terminal Ingredient INGREDIENTE;
 non terminal String NOMBRE, USUARIO, TIPO, COCINA;
 non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA,
-        INSTRUCCION, PROGRAMAR,
-        CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR;
+        INSTRUCCION, PROGRAMAR, CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR;
 
 /* --------------------- Precedences --------------------- */
 
