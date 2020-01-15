@@ -1,6 +1,6 @@
 menu myMerendola {
     nombre: "Merienda estudiantil";
-    100g pan;
+
     plato bocadilloChopped {
         info {
             nombre: "Bocadillo de Chopped";
@@ -16,7 +16,7 @@ menu myMerendola {
         /* Hay que añadirlo
             si no lo añades, no funciona
         */
-        anadir(/* chopped de buena calidad */chopped);
+        anadir(/* chopped de buena calidad */30g chopped);
         programar(37C, espiga, 00:05, inverso);
         sacar("chopped caliente");
         "introducir chopped caliente en pan cortado";

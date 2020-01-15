@@ -3,18 +3,24 @@ package gachaneitor;
 import java_cup.runtime.*;
 import java.io.*;
 
+import java.util.ArrayList;
+
 // class GachaneitorParser;
 
 /* ---------------------- User code ---------------------- */
 parser code {:
     public static BufferedWriter writer;
+    public static ArrayList<Ingredient> listaIngredientes;
+    public static ArrayList<String> listaIds;
 	
     public static void main(String[] args) throws Exception {
 		FileInputStream file = new FileInputStream(args[0]);
 
         String targetName = args[0].replace(".txt", ".gachacode");
-
         writer = new BufferedWriter(new FileWriter(new File(targetName)));
+
+        listaIngredientes = new ArrayList<Ingredient>();
+        listaIds = new ArrayList<String>();
 
 		try {
 			Reader reader = new InputStreamReader(file);
@@ -24,6 +30,12 @@ parser code {:
 		catch (Exception e) {
 			System.out.println("Analysis error");
 			System.exit(1);
+        }
+
+        for(Ingredient i : listaIngredientes) {
+            if(i.getAmmount().getNum() > 0) {
+                System.out.println("Warning!: not fully used ingredient <" + i.getName() + ">");
+            }
         }
 
         writer.close();
@@ -44,23 +56,99 @@ parser code {:
     @Override
     public void syntax_error(Symbol cur_token) {}
 
+    class Ingredient {
+
+        private String name;
+        private Ammount ammount;
+
+        public Ingredient(String name, Ammount ammount) {
+            this.name = name;
+            this.ammount = ammount;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Ammount getAmmount() {
+            return this.ammount;
+        }
+
+        public void setAmmount(Ammount ammount) {
+            this.ammount = ammount;
+        }
+
+        public boolean reduce(Ingredient ingre) {
+    	    this.ammount.setNum(this.ammount.getNum() - ingre.getAmmount().getNum());
+    	
+    	    if(this.ammount.getNum() < 0)
+    		    return false;
+    	    else
+    		    return true;
+        }
+
+        public boolean checkMeasure(Ingredient ingre) {
+            if(this.ammount.getType().equals(ingre.getAmmount().getType()))
+                return true;
+            else
+                return false;
+        }
+
+        public String toString() {
+            if(ammount.getType().equals("al_gusto")) {
+                return "\"" + ammount.getType() + "\",\"" + name + "\"";
+            } else {
+                return "\"" + this.ammount.getNum() + ammount.getType() + "\",\"" + name + "\"";
+            }
+        }
+    }
+
+    class Ammount {
+
+        private int num;
+        private String type;
+
+        public Ammount(int num, String type) {
+            this.num = num;
+            this.type = type;
+        }
+
+        public int getNum() {
+		    return num;
+	    }
+
+	    public void setNum(int num) {
+		    this.num = num;
+	    }
+
+        public String getType() {
+		    return type;
+	    }
+    }
+
 :}
 
 /* ------------------- Grammar Symbols ------------------- */
 
-terminal String string, id, velocidad;
-terminal Integer temp, number, timer;
+terminal String string, id, velocidad, medida;
+terminal Integer temp, number, timer, duracion;
 terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
-        duracion,
         menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
         programar, calentar, remover, anadir, sacar,
-        varoma, inverso, medida, al_gusto;
+        varoma, inverso, al_gusto;
 
-non terminal Integer TEMPERATURA, VELOCIDAD;
+non terminal Integer TEMPERATURA, VELOCIDAD, RACIONES, TIEMPO_TOTAL, CALORIAS;
 non terminal Boolean INVERSO;
+non terminal Ammount CANTIDAD;
+non terminal Ingredient INGREDIENTE;
+non terminal String NOMBRE, USUARIO, TIPO, COCINA;
 non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES, CABECERA,
-        NOMBRE, USUARIO, RACIONES, TIEMPO_TOTAL, CALORIAS, TIPO, COCINA, INSTRUCCION, PROGRAMAR,
-        CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR, INGREDIENTE, CANTIDAD;
+        INSTRUCCION, PROGRAMAR,
+        CALENTAR, REMOVER, ACCION_USUARIO, ANADIR, SACAR;
 
 /* --------------------- Precedences --------------------- */
 
@@ -69,42 +157,50 @@ non terminal MENU, LISTA_INGREDIENTES, LISTA_PLATOS, PLATO, LISTA_INSTRUCCIONES,
 
 MENU ::= menu id llave_izq NOMBRE LISTA_INGREDIENTES LISTA_PLATOS llave_der;
 
-LISTA_INGREDIENTES ::= INGREDIENTE punto_coma LISTA_INGREDIENTES | ;
+LISTA_INGREDIENTES ::= INGREDIENTE:ingre {: if(listaIds.contains(ingre.getName()))
+                                                parser.report_error("duplicate ingredient <" + ingre.getName() + ">", null);
+                                            else {
+                                                listaIds.add(ingre.getName());
+                                                parser.listaIngredientes.add(ingre);
+                                            } 
+                                        :} punto_coma LISTA_INGREDIENTES 
+    | ;
 LISTA_PLATOS ::= PLATO LISTA_PLATOS | PLATO;
 
 PLATO ::= plato id llave_izq CABECERA LISTA_INGREDIENTES LISTA_INSTRUCCIONES llave_der;
 
 LISTA_INSTRUCCIONES ::= INSTRUCCION LISTA_INSTRUCCIONES | ;
 
-CABECERA ::= info llave_izq NOMBRE USUARIO RACIONES TIEMPO_TOTAL CALORIAS TIPO COCINA llave_der;
+CABECERA ::= info llave_izq NOMBRE:name USUARIO:user RACIONES:rations TIEMPO_TOTAL:duration CALORIAS:cal TIPO:tipo COCINA:cocina llave_der
+    {: parser.writer.write("info(\"" + name + "\",\"" + user + "\"," + rations + "," + duration + "," + cal + ",\"" + tipo + "\",\"" + cocina + "\")\n"); :};
 
-NOMBRE ::= nombre dos_puntos string punto_coma 
+NOMBRE ::= nombre dos_puntos string:name punto_coma {: RESULT=name; :}
     | nombre dos_puntos string error {:parser.report_error("expected ';'", null);:}
     | nombre string error {:parser.report_error("expected ':'", null);:} punto_coma;
 
-USUARIO ::= usuario dos_puntos id punto_coma 
+USUARIO ::= usuario dos_puntos id:user punto_coma {: RESULT=user; :}
     | usuario dos_puntos id error {:parser.report_error("expected ';'", null);:}
     | usuario error {:parser.report_error("expected ':'", null);:} id punto_coma ;
 
-RACIONES ::= raciones dos_puntos number punto_coma 
+RACIONES ::= raciones dos_puntos number:rations punto_coma {: RESULT=rations; :}
     | raciones dos_puntos number error {:parser.report_error("expected ';'", null);:}
     | raciones error {:parser.report_error("expected ':'", null);:} number punto_coma;
 
-TIEMPO_TOTAL ::= tiempo dos_puntos duracion punto_coma 
+TIEMPO_TOTAL ::= tiempo dos_puntos duracion:duration punto_coma {: RESULT=duration; :}
     | tiempo dos_puntos duracion error {:parser.report_error("expected ';'", null);:}
     | tiempo error {:parser.report_error("expected ':'", null);:} duracion punto_coma;
 
-CALORIAS ::= calorias dos_puntos number punto_coma 
+CALORIAS ::= calorias dos_puntos number:cal punto_coma {: RESULT=cal; :}
     | calorias dos_puntos number error {:parser.report_error("expected ';'", null);:}
     | calorias error {:parser.report_error("expected ':'", null);:} number punto_coma
     | ;
 
-TIPO ::= tipo dos_puntos string punto_coma 
+TIPO ::= tipo dos_puntos string:tipo punto_coma {: RESULT=tipo; :}
     | tipo dos_puntos string error {:parser.report_error("expected ';'", null);:}
     | tipo error {:parser.report_error("expected ':'", null);:} string punto_coma 
     | ;
 
-COCINA ::= cocina dos_puntos string punto_coma 
+COCINA ::= cocina dos_puntos string:cocina punto_coma {: RESULT=cocina; :}
     | cocina dos_puntos string error {:parser.report_error("expected ';'", null);:}
     | cocina error {:parser.report_error("expected ':'", null);:} string punto_coma
     | ;
@@ -119,8 +215,25 @@ PROGRAMAR ::= programar paren_izq TEMPERATURA:temperature coma VELOCIDAD:speed c
     | programar paren_izq TEMPERATURA coma VELOCIDAD error {:parser.report_error("expected ','", null);:} timer INVERSO paren_der punto_coma
     | programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO error {:parser.report_error("expected ')'", null);:} punto_coma;
 
-ANADIR ::= anadir paren_izq id:ingredient paren_der punto_coma {: parser.writer.write("add(\"" + ingredient + "\")\n"); :}
-    | anadir paren_izq string:ingredient paren_der punto_coma {: parser.writer.write("add(\"" + ingredient + "\")\n"); :}
+ANADIR ::= anadir paren_izq INGREDIENTE:ingre paren_der punto_coma {:   boolean enc = false;
+                                                                        for(Ingredient i : listaIngredientes) {
+                                                                            if(i.getName().equals(ingre.getName())) {
+                                                                                enc = true;
+                                                                                if(!i.reduce(ingre)) {
+					                                                                parser.report_error("overuse of the ingredient <" + i.getName() + ">", null);
+				                                                                }
+                                                                                if(!i.checkMeasure(ingre)) {
+                                                                                    parser.report_error("use of different measures in the ingredient <" + i.getName() + ">", null);
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        if(!enc) {
+                                                                            parser.report_error("undefined ingredient <" + ingre.getName() + ">", null);
+                                                                        } else {
+                                                                            parser.writer.write("add(" + ingre.toString() + ")\n");
+                                                                        }
+                                                                    :}
     | anadir paren_izq id paren_der error {:parser.report_error("expected ';'", null);:}
     | anadir paren_izq string paren_der error {:parser.report_error("expected ';'", null);:}
     | anadir error {:parser.report_error("expected '('", null);:} id paren_der punto_coma
@@ -150,18 +263,20 @@ SACAR ::= sacar paren_izq string:content paren_der punto_coma {: parser.writer.w
     | sacar paren_izq string error {:parser.report_error("expected ')'", null);:} punto_coma;
 
 INVERSO ::= coma inverso {: RESULT=true; :} | {: RESULT=false; :};
-INGREDIENTE ::= CANTIDAD id;
-CANTIDAD ::= al_gusto | number medida;
-TEMPERATURA ::= temp:temperature {: RESULT=temperature; :} | varoma {: RESULT=-30; :};
-VELOCIDAD ::= number:num {: if(num < 30) {
-                                num = 30;
-                                System.out.println("Warning!: The temperature must be above 30°C.");
-                            }
-                            else if(num > 120){
-                                num = 120;
-                                System.out.println("Warning!: The temperature must be below 120°C.");
-                            }
-                            RESULT=num; :} 
+INGREDIENTE ::= CANTIDAD:cant id:ingre {: RESULT=new Ingredient(ingre, cant); :};
+CANTIDAD ::= al_gusto {: RESULT=new Ammount(0, "al_gusto"); :} 
+    | number:num medida:med {: RESULT=new Ammount(num, med); :};
+TEMPERATURA ::= temp:temperature {: if(temperature < 30) {
+                                        temperature = 30;
+                                        System.out.println("Warning!: the temperature must be above 30°C.");
+                                    }
+                                    else if(temperature > 120){
+                                        temperature = 120;
+                                        System.out.println("Warning!: the temperature must be below 120°C.");
+                                    }
+                                    RESULT=temperature; :} 
+    | varoma {: RESULT=-30; :};
+VELOCIDAD ::= number:num {: RESULT=num; :} 
     | velocidad:type {: if(type.equals("cuchara")) RESULT=-1;
                         else if(type.equals("espiga")) RESULT=-2;
                         else if(type.equals("turbo")) RESULT=-3; :};

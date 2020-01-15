@@ -42,7 +42,6 @@ class Utils {
         keywords.put("espiga", sym.velocidad);
         keywords.put("turbo", sym.velocidad);
         keywords.put("inverso", sym.inverso);
-        keywords.put("l", sym.medida);
         keywords.put("ml", sym.medida);
         keywords.put("cucharada", sym.medida);
         keywords.put("g", sym.medida);
@@ -53,7 +52,7 @@ class Utils {
         "cuchara", "espiga", "turbo"
     ));
     private static final ArrayList<String> medidasKeywords = new ArrayList<>(Arrays.asList(
-        "l", "ml", "cucharada", "g", "ud"
+        "ml", "cucharada", "g", "ud"
     ));
     
     public static boolean isKeyword(String cadena) {
@@ -153,7 +152,7 @@ TAB =  \t
                 Utils.debugLog(Utils.getTokenName(yytext()));
                 int token = Utils.getToken(yytext());
 
-                if(token == sym.velocidad)
+                if(token == sym.velocidad || token == sym.medida)
                     return symbol(token, yytext());
                 else
                     return symbol(token);
@@ -170,7 +169,13 @@ TAB =  \t
     \}      { Utils.debugLog("<}> "); return symbol(sym.llave_der); }
     ,       { Utils.debugLog("<,> "); return symbol(sym.coma); }
     ;       { Utils.debugLog("<;> "); return symbol(sym.punto_coma); }
-    ([:digit:]+h)?[:digit:]+m               { Utils.debugLog("<DURACION>[" + yytext() + "] "); return symbol(sym.duracion); }
+    ([:digit:]+h)?[:digit:]+m               { Utils.debugLog("<DURACION>[" + yytext() + "] "); 
+                                            Integer seg;
+                                            if(yytext().contains("h"))
+                                                seg = new Integer(Integer.parseInt(yytext().split("h")[0])*60 + Integer.parseInt(yytext().split("h")[1].split("m")[0]));
+                                            else
+                                                seg = new Integer(Integer.parseInt(yytext().split("m")[0]));
+                                            return symbol(sym.duracion, seg); }
     [:digit:]+C                             { Utils.debugLog("<TEMP>[" + yytext() + "] "); return symbol(sym.temp, 
                                             new Integer(Integer.parseInt(yytext().split("C")[0]))); }
     [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); return symbol(sym.timer, 
