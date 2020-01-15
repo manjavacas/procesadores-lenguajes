@@ -17,7 +17,7 @@ menu myMerendola {
             si no lo añades, no funciona
         */
         anadir(/* chopped de buena calidad */chopped);
-        programar(37ºC, espiga, 00:05, inverso);
+        programar(37C, espiga, 00:05, inverso);
         sacar("chopped caliente");
         "introducir chopped caliente en pan cortado";
     }

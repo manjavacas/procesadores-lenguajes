@@ -44,7 +44,7 @@ run-lexer: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUI
 	@java -cp $(RUN_CLASSPATH) gachaneitor.Lexer recipe.txt
 
 run: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
-	java -cp $(RUN_CLASSPATH) gachaneitor.parser recipe.txt
+	java -cp  $(RUN_CLASSPATH) gachaneitor.parser recipe.txt
 
 
 error-lexer: recipe-error.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class

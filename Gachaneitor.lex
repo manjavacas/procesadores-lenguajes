@@ -134,6 +134,10 @@ class Utils {
     private Symbol symbol(int type) {
         return new Symbol(type, yyline, yycolumn);
     }
+
+    private Symbol symbol(int type, Object value) {
+        return new Symbol(type, yyline, yycolumn, value);
+    }
 %}
 
 
@@ -147,10 +151,15 @@ TAB =  \t
     [:jletter:][:jletterdigit:]*    {
             if(Utils.isKeyword(yytext())) {
                 Utils.debugLog(Utils.getTokenName(yytext()));
-                return symbol(Utils.getToken(yytext()));
+                int token = Utils.getToken(yytext());
+
+                if(token == sym.velocidad)
+                    return symbol(token, yytext());
+                else
+                    return symbol(token);
             } else {
                 Utils.debugLog("<ID>[" + yytext() + "] ");
-                return symbol(sym.id);
+                return symbol(sym.id, yytext());
             }
         }
 
@@ -162,10 +171,11 @@ TAB =  \t
     ,       { Utils.debugLog("<,> "); return symbol(sym.coma); }
     ;       { Utils.debugLog("<;> "); return symbol(sym.punto_coma); }
     ([:digit:]+h)?[:digit:]+m               { Utils.debugLog("<DURACION>[" + yytext() + "] "); return symbol(sym.duracion); }
-    [:digit:]+(°|º)?C                       { Utils.debugLog("<TEMP>[" + yytext() + "] "); return symbol(sym.temp); }
-    [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); return symbol(sym.timer); }
-    [:digit:]*:[:digit:]*                   { Utils.error(Utils.Error.INVALID_TIMER, yytext(), yyline, yycolumn); return symbol(sym.timer); }
-    [:digit:]+                              { Utils.debugLog("<NUMERO>[" + yytext() + "] "); return symbol(sym.number); }
+    [:digit:]+C                             { Utils.debugLog("<TEMP>[" + yytext() + "] "); return symbol(sym.temp, 
+                                            new Integer(Integer.parseInt(yytext().split("C")[0]))); }
+    [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); return symbol(sym.timer, new String(yytext())); }
+    [:digit:]*:[:digit:]*                   { Utils.error(Utils.Error.INVALID_TIMER, yytext(), yyline, yycolumn); return symbol(sym.timer, new String(yytext())); }
+    [:digit:]+                              { Utils.debugLog("<NUMERO>[" + yytext() + "] "); return symbol(sym.number, new Integer(yytext())); }
 
     // Limpiamos el buffer de la cadena y cambiamos de estado
     \"  { cadena.setLength(0); initLine = yyline; initColumn = yycolumn; yybegin(STRING); }
@@ -182,15 +192,15 @@ TAB =  \t
 }
 
 <STRING> {
-    \"  { Utils.debugLog("<CADENA>[" + cadena.toString() + "] "); yybegin(YYINITIAL); return symbol(sym.string); }
+    \"  { Utils.debugLog("<CADENA>[" + cadena.toString() + "] "); yybegin(YYINITIAL); return symbol(sym.string, new String(cadena.toString())); }
     .   { cadena.append(yytext()); }
     \n  { cadena.append(yytext()); }
-    <<EOF>>    { Utils.error(Utils.Error.STRING_END_EXPECTED, null, initLine, initColumn); yybegin(YYINITIAL); return symbol(YYEOF); }
+    <<EOF>>    { Utils.error(Utils.Error.STRING_END_EXPECTED, null, initLine, initColumn); return symbol(YYEOF); }
 }
 
 <COMMENT> {
     "*/"    { yybegin(YYINITIAL); }
     .       {/* ignore */}
     \n      {/* ignore */}
-    <<EOF>> { Utils.error(Utils.Error.COMMENT_END_EXPECTED, null, initLine, initColumn); yybegin(YYINITIAL); return symbol(YYEOF); }
+    <<EOF>> { Utils.error(Utils.Error.COMMENT_END_EXPECTED, null, initLine, initColumn); return symbol(YYEOF); }
 }
