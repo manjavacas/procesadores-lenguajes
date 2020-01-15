@@ -1,39 +1,45 @@
 
-
-
 ifdef OS
    RM = del /Q /S
-   BUILD_DIR = .\build
    OS_SEP = \\
+   CP_SEP = ;
 else
    ifeq ($(shell uname), Linux)
       RM = rm -rf
-	  BUILD_DIR = ./build
 	  OS_SEP = /
+	  CP_SEP = :
    endif
 endif
 
+BUILD_DIR = .$(OS_SEP)build
+ANTLR4_VERSION = 4.7.2
 
-all: gachaneitor
+ANTLR4_LIB = .$(OS_SEP)lib$(OS_SEP)antlr-$(ANTLR4_VERSION)-complete.jar
+ANTLR4 = @java -Xmx128m -jar $(ANTLR4_LIB)
 
-builddir:
-	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+RUN_CLASSPATH = "$(CLASSPATH)$(CP_SEP)$(ANTLR4_LIB)$(CP_SEP)$(BUILD_DIR)"
 
+all: antlr java
 
-gachaneitor: builddir $(BUILD_DIR)$(OS_SEP)Gachaneitor.class
+$(BUILD_DIR):
+ifdef OS
+	@IF NOT EXIST "$(BUILD_DIR)" mkdir "$(BUILD_DIR)";
+else
+	if [ ! -d "$(BUILD_DIR)" ]; then mkdir "$(BUILD_DIR)"; fi
+endif
 
-$(BUILD_DIR)$(OS_SEP)GachaneitorParser.java: Gachaneitor.g4
-	antlr4 -encoding utf-8 -o $(BUILD_DIR) Gachaneitor.g4
+antlr: $(BUILD_DIR) Gachaneitor.g4
+	$(ANTLR4) -encoding utf-8 -o $(BUILD_DIR) Gachaneitor.g4
 
-$(BUILD_DIR)$(OS_SEP)Gachaneitor.class: $(BUILD_DIR)$(OS_SEP)GachaneitorParser.java Gachaneitor.java GachaneitorWalker.java
-	javac -d $(BUILD_DIR) Gachaneitor*.java $(BUILD_DIR)$(OS_SEP)*.java
+java: $(BUILD_DIR) $(BUILD_DIR)$(OS_SEP)GachaneitorParser.java Gachaneitor.java GachaneitorWalker.java
+	javac -cp "$(CLASSPATH)$(CP_SEP)$(ANTLR4_LIB)" -d $(BUILD_DIR) Gachaneitor*.java $(BUILD_DIR)$(OS_SEP)*.java
+
 
 run: $(BUILD_DIR)$(OS_SEP)Gachaneitor.class
-	@java -cp "$(CLASSPATH);$(BUILD_DIR)" Gachaneitor recipe.txt
+	@java -cp $(RUN_CLASSPATH) Gachaneitor recipe.txt
 
-/*run-gui:
-	@java -cp "$(CLASSPATH);$(BUILD_DIR)" org.antlr.v4.gui.TestRig Gachaneitor menu -gui recipe.txt*/
-
+run-gui:
+	@java -cp $(RUN_CLASSPATH) org.antlr.v4.gui.TestRig Gachaneitor menu -gui recipe.txt
 
 
 clean:
