@@ -2,7 +2,7 @@ menu merendola {
     nombre: "Merienda estudiantil";
     100g pan;
     plato bocadilloChopped {
-        */
+         */
         info {
             nombre: "Bocadillo de Chopped";
             usuario: NoamChomsky;

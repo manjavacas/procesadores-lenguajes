@@ -11,7 +11,7 @@ menu myMerendola {
             tipo: "Merienda";
             cocina: "Española";
         }
-        // El chopped es muy importante en esta receta
+        // El chopped es muy importante en esta receta!
         30g chopped;
         /* Hay que añadirlo
             si no lo añades, no funciona

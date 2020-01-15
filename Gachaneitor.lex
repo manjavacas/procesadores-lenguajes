@@ -104,7 +104,7 @@ class Utils {
 
     /** DEBUG **/
     public static void debugLog(String debug) {
-        System.out.print(debug);
+        // System.out.print(debug);
     }
     /** DEBUG **/
 }
@@ -185,12 +185,12 @@ TAB =  \t
     \"  { Utils.debugLog("<CADENA>[" + cadena.toString() + "] "); yybegin(YYINITIAL); return symbol(sym.string); }
     .   { cadena.append(yytext()); }
     \n  { cadena.append(yytext()); }
-    <<EOF>>    { Utils.error(Utils.Error.STRING_END_EXPECTED, null, initLine, initColumn); return symbol(YYEOF); }
+    <<EOF>>    { Utils.error(Utils.Error.STRING_END_EXPECTED, null, initLine, initColumn); yybegin(YYINITIAL); return symbol(YYEOF); }
 }
 
 <COMMENT> {
     "*/"    { yybegin(YYINITIAL); }
     .       {/* ignore */}
     \n      {/* ignore */}
-    <<EOF>> { Utils.error(Utils.Error.COMMENT_END_EXPECTED, null, initLine, initColumn); return symbol(YYEOF); }
+    <<EOF>> { Utils.error(Utils.Error.COMMENT_END_EXPECTED, null, initLine, initColumn); yybegin(YYINITIAL); return symbol(YYEOF); }
 }
