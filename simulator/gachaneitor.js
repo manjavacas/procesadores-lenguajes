@@ -10,10 +10,15 @@ setInterval(() => {
     if(recipe.length <= 0) return;
     if(!stepComplete) return;
 
+    if(gachaneitor_status.sound) {
+        gachaneitor_status.sound.pause();
+        gachaneitor_status.sound = null;
+    }
     stepComplete = false;
     recipeStep++;
     if(recipeStep < recipe.length) {
         timeOutCallback = null;
+        console.log("Step: " + recipe[recipeStep]);
         eval(recipe[recipeStep]);
     }
 }, 200);
@@ -26,7 +31,7 @@ function loadGachacode() {
 
         var fileReader = new FileReader();
         fileReader.onload = (e) => {
-            recipe = e.target.result.split('\n');
+            recipe = e.target.result.split('\n').filter((step) => step);
             recipeStep = -1;
             stepComplete = true;
         };
@@ -76,6 +81,8 @@ function take(content) {
     console.log(`Take ${content} from the Gachaneitor Bowl`);
 
     gachaneitor_status.screen_properties.take.content = content;
+    gachaneitor_status.sound = new Audio('audio/take.mp3');
+    gachaneitor_status.sound.play();
     changeScreen(SCREEN.TAKE);
 }
 
@@ -106,7 +113,10 @@ function setup() {
     g_config.dial_big.box_size = g_config.screen_width/3.1;
     g_config.dial_small.box_size = g_config.screen_width/4;
 
-    // Set iimage sources
+    // Set image sources
+    g_config.take_img.src = "img/take.png";
+    g_config.add_img.src = "img/add.png";
+    g_config.useraction_img.src = "img/useraction.png";
     g_config.time_symbol_img.src = "img/time.png";
     g_config.speed_symbol_img.src = "img/speed.png";
     g_config.cover_img.onload = () => {
@@ -205,6 +215,7 @@ const SCREEN = {
 var SCREEN_PROGRAM_ITEMS = ['none', 'time', 'temp', 'speed'];
 
 var gachaneitor_status = {
+    sound: null,
     speed: 0,
     temp: 0,
     time: [0, 0],
@@ -230,6 +241,9 @@ var gachaneitor_status = {
 var g_config = {
     base_img: new Image(),
     cover_img: new Image(),
+    take_img: new Image(),
+    add_img: new Image(),
+    useraction_img: new Image(),
     cover_shown: true,
     cover_x: -1,
     cover_y: -1,
@@ -326,6 +340,10 @@ var g_config = {
     generic: {
         text_color: "#000000",
         text_font: "17px Verdana",
+    },
+    generic_small: {
+        text_color: "#333333",
+        text_font: "12px Verdana",
     }
 };
 
@@ -605,9 +623,7 @@ function drawSpeed(speed, x, y, conf, is_big) {
 }
 
 function drawImage(image, x, y, w, h) {
-    //g.drawImage(image, x, y, w, h);
-    g.fillStyle = '#000000';
-    g.fillRect(x, y, w, h);
+    g.drawImage(image, x, y, w, h);
 }
 
 function drawText(text, x, y, w, h, conf) {    
@@ -615,7 +631,25 @@ function drawText(text, x, y, w, h, conf) {
     g.font = conf.text_font;
     g.textBaseline = 'middle';
     g.textAlign = "left";
-    g.fillText(text, x, y+30);
+    var y_initial = y;
+    y += 0.6 * parseInt(g.font.match(/\d+/), 10);
+
+    var words = text.split(' ');
+    var line = '';
+    words.forEach(word => {
+        if(y > y_initial + h) return;
+        if(g.measureText(line + word).width > w) {
+            g.fillText(line, x, y);
+            y += 1.5 * parseInt(g.font.match(/\d+/), 10);
+
+            if(g.measureText(word).width <= w)
+                line = word + ' ';
+            else
+                line = word.substring(0, line.length - 4) + '... ';
+        } else
+            line += word + ' ';
+    });
+    g.fillText(line, x, y);
 }
 
 function onDraw() {
@@ -643,51 +677,64 @@ function onDraw() {
 
         case SCREEN.ADD:
             if(!gachaneitor_status.invalidated) break;
-
             drawText(
-                `Add ${gachaneitor_status.screen_properties.add.ingredient_name}`,
-                g_config.screen_x + 0.5 * g_config.screen_width,
-                g_config.screen_y,
-                0.5 * g_config.screen_width,
-                g_config.screen_height,
+                'Añada',
+                g_config.screen_x + 1.05 * g_config.screen_height,
+                g_config.screen_y + 0.05 * g_config.screen_height,
+                g_config.screen_width - 1.1 * g_config.screen_height,
+                0.17 * g_config.screen_height,
+                g_config.generic_small);
+            drawText(
+                `${gachaneitor_status.screen_properties.add.ingredient_name}`,
+                g_config.screen_x + 1.05 * g_config.screen_height,
+                g_config.screen_y + 0.17 * g_config.screen_height,
+                g_config.screen_width - 1.1 * g_config.screen_height,
+                0.78 * g_config.screen_height,
                 g_config.generic);
             drawImage(g_config.add_img,
-                g_config.screen_x + 0.05 * g_config.screen_width,
-                g_config.screen_y + 0.05 * g_config.screen_width,
-                0.4 * g_config.screen_width,
-                g_config.screen_height - 0.1 * g_config.screen_width)
+                g_config.screen_x + 0.05 * g_config.screen_height,
+                g_config.screen_y + 0.05 * g_config.screen_height,
+                0.9 * g_config.screen_height,
+                g_config.screen_height - 0.1 * g_config.screen_height);
             break;
         case SCREEN.TAKE:
             if(!gachaneitor_status.invalidated) break;
-
+            
             drawText(
-                `Take ${gachaneitor_status.screen_properties.take.content}`,
-                g_config.screen_x + 0.5 * g_config.screen_width,
-                g_config.screen_y,
-                0.5 * g_config.screen_width,
-                g_config.screen_height,
+                'Retire',
+                g_config.screen_x + 1.05 * g_config.screen_height,
+                g_config.screen_y + 0.05 * g_config.screen_height,
+                g_config.screen_width - 1.1 * g_config.screen_height,
+                0.17 * g_config.screen_height - 0.1 * g_config.screen_height,
+                g_config.generic_small);
+            drawText(
+                `${gachaneitor_status.screen_properties.take.content}`,
+                g_config.screen_x + 1.05 * g_config.screen_height,
+                g_config.screen_y + 0.17 * g_config.screen_height,
+                g_config.screen_width - 1.1 * g_config.screen_height,
+                0.78 * g_config.screen_height,
                 g_config.generic);
             drawImage(g_config.take_img,
-                g_config.screen_x + 0.05 * g_config.screen_width,
-                g_config.screen_y + 0.05 * g_config.screen_width,
-                0.4 * g_config.screen_width,
-                g_config.screen_height - 0.1 * g_config.screen_width)
+                g_config.screen_x + 0.05 * g_config.screen_height,
+                g_config.screen_y + 0.05 * g_config.screen_height,
+                0.9 * g_config.screen_height,
+                g_config.screen_height - 0.1 * g_config.screen_height);
             break;
         case SCREEN.USER_ACTION:
             if(!gachaneitor_status.invalidated) break;
 
             drawText(
                 gachaneitor_status.screen_properties.useraction.action,
-                g_config.screen_x + 0.5 * g_config.screen_width,
-                g_config.screen_y,
-                0.5 * g_config.screen_width,
-                g_config.screen_height,
+                g_config.screen_x + 1.05 * g_config.screen_height,
+                g_config.screen_y + 0.1 * g_config.screen_height,
+                g_config.screen_width - 1.1 * g_config.screen_height,
+                0.75 * g_config.screen_height,
                 g_config.generic);
             drawImage(g_config.useraction_img,
-                g_config.screen_x + 0.05 * g_config.screen_width,
-                g_config.screen_y + 0.05 * g_config.screen_width,
-                0.4 * g_config.screen_width,
-                g_config.screen_height - 0.1 * g_config.screen_width)
+                g_config.screen_x + 0.05 * g_config.screen_height,
+                g_config.screen_y + 0.05 * g_config.screen_height,
+                0.9 * g_config.screen_height,
+                g_config.screen_height - 0.1 * g_config.screen_height);
             break;
     }
     gachaneitor_status.invalidated = false;
