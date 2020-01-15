@@ -48,8 +48,8 @@ parser code {:
 
 /* ------------------- Grammar Symbols ------------------- */
 
-terminal String string, id, timer, velocidad;
-terminal Integer temp, number;
+terminal String string, id, velocidad;
+terminal Integer temp, number, timer;
 terminal paren_izq, paren_der, llave_izq, llave_der, dos_puntos, coma, punto_coma,
         duracion,
         menu, plato, info, nombre, usuario, raciones, tiempo, calorias, tipo, cocina,
@@ -112,7 +112,7 @@ COCINA ::= cocina dos_puntos string punto_coma
 INSTRUCCION ::= PROGRAMAR | ANADIR | CALENTAR | REMOVER | ACCION_USUARIO | SACAR;
 
 PROGRAMAR ::= programar paren_izq TEMPERATURA:temperature coma VELOCIDAD:speed coma timer:time INVERSO:reverse paren_der punto_coma
-    {: parser.writer.write("program(" + temperature.toString() + "," + speed.toString() + "," + time + "," + reverse.toString() + ")\n"); :}
+    {: parser.writer.write("program(" + temperature.toString() + "," + speed.toString() + "," + time.toString() + "," + reverse.toString() + ")\n"); :}
     | programar paren_izq TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der error {:parser.report_error("expected ';'", null);:}
     | programar error {:parser.report_error("expected '('", null);:} TEMPERATURA coma VELOCIDAD coma timer INVERSO paren_der punto_coma
     | programar paren_izq TEMPERATURA error {:parser.report_error("expected ','", null);:} VELOCIDAD coma timer INVERSO paren_der punto_coma
@@ -129,13 +129,13 @@ ANADIR ::= anadir paren_izq id:ingredient paren_der punto_coma {: parser.writer.
     | anadir paren_izq string error {:parser.report_error("expected ')'", null);:} punto_coma;
 
 CALENTAR ::= calentar paren_izq TEMPERATURA:temperature coma timer:time paren_der punto_coma
-    {: parser.writer.write("program(" + temperature.toString() + ", 0," + time + ")\n"); :}
+    {: parser.writer.write("program(" + temperature.toString() + ", 0," + time.toString() + ")\n"); :}
     | calentar paren_izq TEMPERATURA coma timer paren_der error {:parser.report_error("expected ';'", null);:}
     | calentar error {:parser.report_error("expected '('", null);:} TEMPERATURA coma timer paren_der punto_coma
     | calentar paren_izq TEMPERATURA coma timer error {:parser.report_error("expected ')'", null);:} punto_coma;
 
 REMOVER ::= remover paren_izq VELOCIDAD:speed coma timer:time INVERSO:reverse paren_der punto_coma
-    {: parser.writer.write("program(0," + speed.toString() + "," + time + "," + reverse.toString() + ")\n"); :}
+    {: parser.writer.write("program(0," + speed.toString() + "," + time.toString() + "," + reverse.toString() + ")\n"); :}
     | remover paren_izq VELOCIDAD coma timer INVERSO paren_der error {:parser.report_error("expected ';'", null);:}
     | remover paren_izq VELOCIDAD error {:parser.report_error("expected ','", null);:} timer INVERSO paren_der punto_coma
     | remover error {:parser.report_error("expected '('", null);:} VELOCIDAD coma timer INVERSO paren_der punto_coma
