@@ -173,7 +173,8 @@ TAB =  \t
     ([:digit:]+h)?[:digit:]+m               { Utils.debugLog("<DURACION>[" + yytext() + "] "); return symbol(sym.duracion); }
     [:digit:]+C                             { Utils.debugLog("<TEMP>[" + yytext() + "] "); return symbol(sym.temp, 
                                             new Integer(Integer.parseInt(yytext().split("C")[0]))); }
-    [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); return symbol(sym.timer, new String(yytext())); }
+    [:digit:][:digit:]:[:digit:][:digit:]   { Utils.debugLog("<TEMPORIZADOR>[" + yytext() + "] "); return symbol(sym.timer, 
+                                            new Integer(Integer.parseInt(yytext().split(":")[0])*60 + Integer.parseInt(yytext().split(":")[1]))); }
     [:digit:]*:[:digit:]*                   { Utils.error(Utils.Error.INVALID_TIMER, yytext(), yyline, yycolumn); return symbol(sym.timer, new String(yytext())); }
     [:digit:]+                              { Utils.debugLog("<NUMERO>[" + yytext() + "] "); return symbol(sym.number, new Integer(yytext())); }
 

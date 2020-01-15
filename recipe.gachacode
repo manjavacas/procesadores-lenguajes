@@ -1,4 +1,4 @@
 add("chopped")
-program(37,-2,00:05,true)
+program(37,-2,5,true)
 take("chopped caliente")
 useraction("introducir chopped caliente en pan cortado")
