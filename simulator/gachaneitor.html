@@ -28,7 +28,7 @@
                 left: 800px;
                 top: 0;
                 margin: 20px;
-                min-height: 200px;
+                min-height: 80px;
                 max-height: 300px;
                 width: 300px;
                 overflow-y: auto;
@@ -40,9 +40,10 @@
             #recipe-info > table {
                 margin: 0 auto;
                 margin-top: 10px;
+                font-family: sans-serif;
             }
             #recipe-info > table td {
-                padding: 2px 5px;
+                padding: 2px 10px;
             }
             #recipe-name {
                 font-weight: bold;
@@ -65,7 +66,7 @@
         <input id="gachacode-file" type="file" accept=".gachacode" style="visibility:hidden" />
         <button onclick="loadGachacode()" id="gachaneitor-button"></button>
         <div id="recipe-info-container">
-            <span id="recipe-info-default"><br>Press the <i>Gachaneitor</i> button to load a recipe</span>
+            <span id="recipe-info-default"><br>Pulsa el botón de la <i>Gachaneitor</i> para cargar una receta</span>
             <div id="recipe-info">
                 <span id="recipe-name"></span>
                 <table>
