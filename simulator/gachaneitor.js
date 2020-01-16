@@ -50,6 +50,7 @@ function info(recipe_name, username, portions, duration, calories, type, cuisine
             (duration % 60 > 0 ? duration % 60 + ' min' : ''),
         calories + ' kcal.',
         type, cuisine);
+    stepComplete = true;
 }
 
 function program(temp, speed, time, reverse=false) {
