@@ -18,7 +18,6 @@ setInterval(() => {
     recipeStep++;
     if(recipeStep < recipe.length) {
         timeOutCallback = null;
-        console.log("Step: " + recipe[recipeStep]);
         eval(recipe[recipeStep]);
     }
 }, 200);
@@ -31,7 +30,8 @@ function loadGachacode() {
 
         var fileReader = new FileReader();
         fileReader.onload = (e) => {
-            recipe = e.target.result.split('\n').filter((step) => step);
+            recipe = e.target.result.split('\n').filter((step) => step && step.trim().length > 0);
+            setPlateInfo(true);
             recipeStep = -1;
             stepComplete = true;
         };
@@ -43,12 +43,22 @@ function loadGachacode() {
     fileInput.click();
 }
 
+function info(recipe_name, username, portions, duration, calories, type, cuisine) {
+    setPlateInfo(true,
+        recipe_name, username, portions,
+        (Math.floor(duration / 60) > 0 ? Math.floor(duration/60) + ' h ' : '') + 
+            (duration % 60 > 0 ? duration % 60 + ' min' : ''),
+        calories + ' kcal.',
+        type, cuisine);
+}
+
 function program(temp, speed, time, reverse=false) {
-    console.log(`programming at ${temp}C, blade speed ${speed}, ${time} seconds${reverse ? ' [reverse]' : ''}`);
+    console.log(`Programming at ${temp}C, blade speed ${speed}, ${time} seconds${reverse ? ' [reverse]' : ''}`);
 
     gachaneitor_status.temp = temp;
 
     gachaneitor_status.speed = speed;
+    gachaneitor_status.blade_reverse = reverse;
 
     var minutes = Math.floor(time / 60);
     var seconds = time % 60;
@@ -70,9 +80,10 @@ function stir(speed, time, reverse=falase) {
     program(0, speed, time, reverse);
 }*/
 
-function add(ingredient) {
-    console.log(`Add ${ingredient}`);
+function add(amount, ingredient) {
+    console.log(`Add ${amount} of ${ingredient}`);
 
+    gachaneitor_status.screen_properties.add.amount = amount;
     gachaneitor_status.screen_properties.add.ingredient_name = ingredient;
     changeScreen(SCREEN.ADD);
 }
@@ -93,8 +104,28 @@ function useraction(action) {
     changeScreen(SCREEN.USER_ACTION);
 }
 
+function setPlateInfo(show=true, recipe_name="---", username="-", portions="-", duration="-", calories="-", type="-", cuisine="-") {
+    if(!show) {
+        document.getElementById("recipe-info").style.display = "none";
+        document.getElementById("recipe-info-default").style.display = "block";
+        return;
+    }
+    document.getElementById("recipe-info-default").style.display = "none";
+    document.getElementById("recipe-info").style.display = "block";
+
+    document.getElementById("recipe-name").innerHTML = recipe_name;
+    document.getElementById("recipe-username").innerHTML = username;
+    document.getElementById("recipe-portions").innerHTML = portions;
+    document.getElementById("recipe-duration").innerHTML = duration;
+    document.getElementById("recipe-calories").innerHTML = calories;
+    document.getElementById("recipe-type").innerHTML = type;
+    document.getElementById("recipe-cuisine").innerHTML = cuisine;
+}
+
 
 function setup() {
+    setPlateInfo(false);
+
     // Initialize canvas and graphics context
     canvas = document.getElementById("gachaneitor");
     g = canvas.getContext("2d");
@@ -170,7 +201,9 @@ function onMouseClick(e) {
         case SCREEN.ADD:
         case SCREEN.TAKE:
         case SCREEN.USER_ACTION:
-            stepComplete = true;
+            if(e.x >= g_config.screen_x && e.x <= g_config.screen_x + g_config.screen_width
+                && e.y >= g_config.screen_y && e.y <= g_config.screen_y + g_config.screen_height)
+                    stepComplete = true;
             break;
     }
 }
@@ -178,13 +211,13 @@ function onMouseClick(e) {
 function onMouseMove(e) {
     if(e.x >= g_config.cover_x && e.x <= g_config.cover_x + g_config.cover_width
         && e.y >= g_config.cover_y && e.y <= g_config.cover_y + g_config.cover_height) {
-            if(g_config.cover_shown) {
-                g_config.cover_shown = false;
+            if(gachaneitor_status.cover_shown) {
+                gachaneitor_status.cover_shown = false;
                 redraw(g_config);
             }
     } else {
-        if(!g_config.cover_shown) {
-            g_config.cover_shown = true;
+        if(!gachaneitor_status.cover_shown) {
+            gachaneitor_status.cover_shown = true;
             redraw(g_config);
         }
     } 
@@ -200,10 +233,13 @@ function updateTime() {
     
     if(gachaneitor_status.time[1] == 0) {
         gachaneitor_status.time[0] -= 1;
-        gachaneitor_status.time[1] = 59; 
+        gachaneitor_status.time[1] = 59;
     } else {
         gachaneitor_status.time[1] -= 1;
     }
+    if(gachaneitor_status.screen == SCREEN.PROGRAM &&
+        gachaneitor_status.temp < 0 && gachaneitor_status.temp > -120)
+            gachaneitor_status.temp--;
 }
 
 const SCREEN = {
@@ -216,6 +252,9 @@ var SCREEN_PROGRAM_ITEMS = ['none', 'time', 'temp', 'speed'];
 
 var gachaneitor_status = {
     sound: null,
+    cover_shown: true,
+    blade_angle: 0,
+    blade_reverse: false,
     speed: 0,
     temp: 0,
     time: [0, 0],
@@ -226,6 +265,7 @@ var gachaneitor_status = {
             selected: SCREEN_PROGRAM_ITEMS[2]
         },
         add: {
+            amount: "",
             ingredient_name: ""
         },
         take: {
@@ -244,7 +284,6 @@ var g_config = {
     take_img: new Image(),
     add_img: new Image(),
     useraction_img: new Image(),
-    cover_shown: true,
     cover_x: -1,
     cover_y: -1,
     cover_width: 0,
@@ -354,7 +393,7 @@ function changeScreen(screen) {
 
 function redraw(conf) {
     g.drawImage(g_config.base_img, 0, 0, canvas.width, canvas.height);
-    if(g_config.cover_shown) {
+    if(gachaneitor_status.cover_shown) {
         g.drawImage(g_config.cover_img, 0, 0, canvas.width, canvas.height);
     }
     gachaneitor_status.invalidated = true;
@@ -386,7 +425,7 @@ function drawDialBase(x, y, dial_conf) {
     g.shadowOffsetY = 0;
 }
 
-function drawDialProgressBar(x, y, value, min_value, max_value, bar_conf, dial_conf) {
+function drawDialProgressBar(x, y, value, min_value, max_value, bar_conf, dial_conf, special_color=null) {
 
     var step_angle = 1.9 * (1 / (max_value - min_value)) * Math.PI;
     var init_angle = (-0.5 + bar_conf.offset) * Math.PI;
@@ -404,7 +443,7 @@ function drawDialProgressBar(x, y, value, min_value, max_value, bar_conf, dial_c
     g.stroke();
 
     // Draw bar
-    g.strokeStyle = dial_conf.bar_color;
+    g.strokeStyle = special_color ? special_color : dial_conf.bar_color;
     g.lineWidth = dial_conf.bar_width;
     g.beginPath();
     g.arc(x, y,
@@ -440,7 +479,7 @@ function drawDialProgressBar(x, y, value, min_value, max_value, bar_conf, dial_c
     // Draw bar init mark
     if(bar_conf.mark_init > 0) {
         g.save();
-        g.strokeStyle = dial_conf.bar_color;
+        g.strokeStyle = special_color ? special_color : dial_conf.bar_color;
         g.lineWidth = dial_conf.barMark_width;
         g.beginPath();
         g.translate(x, y);
@@ -595,6 +634,17 @@ function speedToText(speed) {
         return "0.0";
 }
 
+function speedToColor(speed) {
+    if(speed == -1)
+        return "#5DADE2";   // Cuchara
+    else if(speed == -2)
+        return "#F1B30F";   // Espiga
+    else if(speed == -3)
+        return "#DC6031";   // Turbo
+    else
+        return null;
+}
+
 function drawSpeed(speed, x, y, conf, is_big) {
     if(is_big)
         dial_conf = conf.dial_big;
@@ -609,9 +659,10 @@ function drawSpeed(speed, x, y, conf, is_big) {
 
     // Draw bar
     drawDialProgressBar(x, y,
-        speed+0.5,
+        (speed > 0 ? speed : (speed > -3 ? conf.speed_min : conf.speed_max)) + 0.5,
         conf.speed_min, conf.speed_max+0.5,
-        conf.speed_bar, dial_conf);
+        conf.speed_bar, dial_conf,
+        special_color=speedToColor(speed));
 
     // Draw text value
     drawDialTitle(x, y,
@@ -622,8 +673,17 @@ function drawSpeed(speed, x, y, conf, is_big) {
     drawDialSymbol(x, y, conf.speed_symbol_img, "", dial_conf);
 }
 
-function drawImage(image, x, y, w, h) {
-    g.drawImage(image, x, y, w, h);
+function speedToBladeIncrement(speed) {
+    if(speed >= 0)
+        return 1.5 * speed/10.0;
+    if(speed == -1)
+        return 0.02;   // Cuchara
+    else if(speed == -2)
+        return 0.08;   // Espiga
+    else if(speed == -3)
+        return 2;   // Turbo
+    else
+        return 0.0;
 }
 
 function drawText(text, x, y, w, h, conf) {    
@@ -685,13 +745,13 @@ function onDraw() {
                 0.17 * g_config.screen_height,
                 g_config.generic_small);
             drawText(
-                `${gachaneitor_status.screen_properties.add.ingredient_name}`,
+                `${gachaneitor_status.screen_properties.add.amount} de ${gachaneitor_status.screen_properties.add.ingredient_name}`,
                 g_config.screen_x + 1.05 * g_config.screen_height,
                 g_config.screen_y + 0.17 * g_config.screen_height,
                 g_config.screen_width - 1.1 * g_config.screen_height,
                 0.78 * g_config.screen_height,
                 g_config.generic);
-            drawImage(g_config.add_img,
+            g.drawImage(g_config.add_img,
                 g_config.screen_x + 0.05 * g_config.screen_height,
                 g_config.screen_y + 0.05 * g_config.screen_height,
                 0.9 * g_config.screen_height,
@@ -714,7 +774,7 @@ function onDraw() {
                 g_config.screen_width - 1.1 * g_config.screen_height,
                 0.78 * g_config.screen_height,
                 g_config.generic);
-            drawImage(g_config.take_img,
+            g.drawImage(g_config.take_img,
                 g_config.screen_x + 0.05 * g_config.screen_height,
                 g_config.screen_y + 0.05 * g_config.screen_height,
                 0.9 * g_config.screen_height,
@@ -730,12 +790,46 @@ function onDraw() {
                 g_config.screen_width - 1.1 * g_config.screen_height,
                 0.75 * g_config.screen_height,
                 g_config.generic);
-            drawImage(g_config.useraction_img,
+            g.drawImage(g_config.useraction_img,
                 g_config.screen_x + 0.05 * g_config.screen_height,
                 g_config.screen_y + 0.05 * g_config.screen_height,
                 0.9 * g_config.screen_height,
                 g_config.screen_height - 0.1 * g_config.screen_height);
             break;
     }
+    if(!gachaneitor_status.cover_shown) {
+        // Clear
+        g.fillStyle = "#000000";
+        g.beginPath();
+        g.arc(
+            g_config.cover_x + 0.5 * g_config.cover_width,
+            g_config.cover_y + 0.63 * g_config.cover_height,
+            0.3 * g_config.cover_height,
+            0, 2 * Math.PI);
+        g.fill();
+        
+        // Spiral
+        var centerx = g_config.cover_x + 0.5 * g_config.cover_width;
+        var centery = g_config.cover_y + 0.63 * g_config.cover_height;
+        g.moveTo(centerx, centery);
+        g.beginPath();
+        var angle;
+        for (i = 0; i < 600; i++) {
+            angle = 0.1 * i;
+            x = centerx + (1 * angle) * Math.cos(angle + gachaneitor_status.blade_angle);
+            y = centery + (0.8 * angle) * Math.sin(angle + gachaneitor_status.blade_angle);
+
+            g.lineTo(x, y);
+        }
+        g.strokeStyle = "#AAA";
+        g.stroke();
+
+        if(gachaneitor_status.screen == SCREEN.PROGRAM && (gachaneitor_status.time[0] > 0 || gachaneitor_status.time[1] > 0)) {
+            gachaneitor_status.blade_angle += 
+                (gachaneitor_status.blade_reverse ? -1 : 1) *
+                speedToBladeIncrement(gachaneitor_status.speed);
+        }
+    }
+
     gachaneitor_status.invalidated = false;
 }

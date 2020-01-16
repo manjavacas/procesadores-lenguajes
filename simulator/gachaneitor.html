@@ -19,6 +19,43 @@
                 width:92px;
                 height:92px
             }
+            #recipe-info-container {
+                background: rgb(231, 232, 241);
+                border-radius: 5px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 0px 10px 0 rgba(0, 0, 0, 0.19);
+                padding: 10px;
+                position: absolute;
+                left: 800px;
+                top: 0;
+                margin: 20px;
+                min-height: 200px;
+                max-height: 300px;
+                width: 300px;
+                overflow-y: auto;
+                text-align: center;
+            }
+            #recipe-info {
+                width: 100%;
+            }
+            #recipe-info > table {
+                margin: 0 auto;
+                margin-top: 10px;
+            }
+            #recipe-info > table td {
+                padding: 2px 5px;
+            }
+            #recipe-name {
+                font-weight: bold;
+                font-style: italic;
+                font-size: large;
+            }
+            .recipe-property-name {
+                text-align: right;
+                font-weight: bold;
+            }
+            .recipe-property-value {
+                text-align: left;
+            }
         </style>
     </head>
     <body onload="setup()">
@@ -27,5 +64,37 @@
         </canvas>
         <input id="gachacode-file" type="file" accept=".gachacode" style="visibility:hidden" />
         <button onclick="loadGachacode()" id="gachaneitor-button"></button>
+        <div id="recipe-info-container">
+            <span id="recipe-info-default"><br>Press the <i>Gachaneitor</i> button to load a recipe</span>
+            <div id="recipe-info">
+                <span id="recipe-name"></span>
+                <table>
+                    <tr>
+                        <td class="recipe-property-name">Duración</td>
+                        <td id="recipe-duration" class="recipe-property-value"></td>
+                    </tr>
+                    <tr>
+                        <td class="recipe-property-name">Raciones</td>
+                        <td id="recipe-portions" class="recipe-property-value"></td>
+                    </tr>
+                    <tr>
+                        <td class="recipe-property-name">Calorías</td>
+                        <td id="recipe-calories" class="recipe-property-value"></td>
+                    </tr>
+                    <tr>
+                        <td class="recipe-property-name">Tipo</td>
+                        <td id="recipe-type" class="recipe-property-value"></td>
+                    </tr>
+                    <tr>
+                        <td class="recipe-property-name">Cocina</td>
+                        <td id="recipe-cuisine" class="recipe-property-value"></td>
+                    </tr>
+                    <tr>
+                        <td class="recipe-property-name">Usuario</td>
+                        <td id="recipe-username" class="recipe-property-value"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     </body>
 </html>
