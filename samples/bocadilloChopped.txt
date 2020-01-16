@@ -7,8 +7,8 @@ menu myMerendola {
             nombre: "Bocadillo de Chopped";
             usuario: NoamChomsky;
             raciones: 1;
-            tiempo: 5m;
-            calorias: 44;
+            tiempo: 3m;
+            calorias: 305;
             tipo: "Merienda";
             cocina: "Española";
         }
@@ -18,7 +18,7 @@ menu myMerendola {
             si no lo añades, no funciona
         */
         anadir(/* chopped de buena calidad */30g chopped);
-        programar(37C, espiga, 00:05, inverso);
+        programar(37C, cuchara, 00:05, inverso);
         sacar("Chopped caliente");
         "Introduce el chopped caliente en el pan cortado";
     }

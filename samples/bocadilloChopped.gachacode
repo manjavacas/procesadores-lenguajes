@@ -1,5 +1,0 @@
-info("Bocadillo de Chopped","NoamChomsky",1,5,44,"Merienda","Española")
-add("30g","chopped")
-program(37,-2,5,true)
-take("Chopped caliente")
-useraction("Introduce el chopped caliente en el pan cortado")

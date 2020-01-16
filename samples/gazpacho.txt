@@ -1,0 +1,49 @@
+menu menu1 {
+    nombre: "Menú";
+
+    plato gazpacho {
+        info {
+            nombre: "Gazpacho";
+            usuario: ILoveGazpachito;
+            raciones: 1;
+            tiempo: 7m;
+            calorias: 52;
+            tipo: "Sopa fría";
+            cocina: "Española (Andalucía)";
+        }
+        1000g tomate;
+        1 ud ajo;
+        50g pimientoVerde;
+        40g cebolla;
+        70g pepino;
+        30g vinagre;
+        1 cucharada sal;
+        50g aceite;
+        8 ud hielo;
+        200g agua;
+        //150g pan;
+        
+        anadir(1000g tomate);
+        anadir(50g pimientoVerde);
+        anadir(40g cebolla);
+        anadir(70g pepino);
+        anadir(30g vinagre);
+        anadir(1 cucharada sal);
+        anadir(50g aceite);
+        anadir(8 ud hielo);
+
+        "Pon la cuchilla de triturado";
+        remover(5, 00:30);
+        remover(turbo, 03:00);
+
+        // Añadir agua si lo quieres más líquido
+        anadir(200g agua);
+        
+        // Añadir pan si lo quieres más espeso
+        //anadir(150g pan);
+        //remover(5, 01:30);
+
+        sacar("Gazpacho");
+        "Proceda a servir el gazpacho con pan troceado en dados pequeños";
+    }
+}

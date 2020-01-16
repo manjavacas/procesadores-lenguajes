@@ -25,3 +25,6 @@ hs_err_pid*
 # Build directories
 /ANTLR/build/
 /build/
+
+# Generated .gachacode files
+*.gachacode
