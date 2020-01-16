@@ -40,19 +40,18 @@ cup: $(BUILD_DIR) Gachaneitor.cup
 java: $(BUILD_DIR) $(BUILD_DIR)$(OS_SEP)Lexer.java $(BUILD_DIR)$(OS_SEP)parser.java $(BUILD_DIR)$(OS_SEP)sym.java
 	javac -cp "$(CLASSPATH)$(CP_SEP)$(CUP_RUNTIME)" -d $(BUILD_DIR) -encoding utf8 "$(BUILD_DIR)$(OS_SEP)Lexer.java" "$(BUILD_DIR)$(OS_SEP)parser.java" "$(BUILD_DIR)$(OS_SEP)sym.java"
 
-run-lexer: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
-	@java -cp $(RUN_CLASSPATH) gachaneitor.Lexer recipe.txt
+run-lexer: samples$(OS_SEP)bocadilloChopped.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
+	@java -cp $(RUN_CLASSPATH) gachaneitor.Lexer samples$(OS_SEP)bocadilloChopped.txt
 
-run: recipe.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
-	java -cp  $(RUN_CLASSPATH) gachaneitor.parser recipe.txt
+run: samples$(OS_SEP)bocadilloChopped.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
+	@java -cp $(RUN_CLASSPATH) gachaneitor.parser samples$(OS_SEP)bocadilloChopped.txt
 
 
-error-lexer: recipe-error.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
-	@java -cp $(RUN_CLASSPATH) gachaneitor.Lexer recipe-error.txt
+error-lexer: samples$(OS_SEP)bocadilloChoppedError.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
+	@java -cp $(RUN_CLASSPATH) gachaneitor.Lexer samples$(OS_SEP)bocadilloChoppedError.txt
 
-error: recipe-error.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
-	@java -cp $(RUN_CLASSPATH) gachaneitor.parser recipe-error.txt
-
+error: samples$(OS_SEP)bocadilloChoppedError.txt $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)Lexer.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)parser.class $(BUILD_DIR)$(OS_SEP)gachaneitor$(OS_SEP)sym.class
+	@java -cp $(RUN_CLASSPATH) gachaneitor.parser samples$(OS_SEP)bocadilloChoppedError.txt
 
 clean:
 	$(RM) $(BUILD_DIR)

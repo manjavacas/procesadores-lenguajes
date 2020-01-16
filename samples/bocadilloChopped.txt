@@ -19,7 +19,7 @@ menu myMerendola {
         */
         anadir(/* chopped de buena calidad */30g chopped);
         programar(37C, espiga, 00:05, inverso);
-        sacar("chopped caliente");
-        "introducir chopped caliente en pan cortado";
+        sacar("Chopped caliente");
+        "Introduce el chopped caliente en el pan cortado";
     }
 }
