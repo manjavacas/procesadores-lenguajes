@@ -686,6 +686,28 @@ function speedToBladeIncrement(speed) {
         return 0.0;
 }
 
+function drawBlade(blade_angle, x, y, r) {
+    // Clean region
+    g.fillStyle = "#1d1d1d";
+    g.beginPath();
+    g.arc(x, y, r, 0, 2 * Math.PI);
+    g.fill();
+    
+    // Blade (spiral)
+    g.moveTo(x, y);
+    g.beginPath();
+    var angle, _x, _y;
+    for (i = 0; i < 600; i++) {
+        angle = 0.1 * i;
+        _x = x + (1 * angle) * Math.cos(angle + blade_angle);
+        _y = y + (0.8 * angle) * Math.sin(angle + blade_angle);
+
+        g.lineTo(_x, _y);
+    }
+    g.strokeStyle = "#AAA";
+    g.stroke();
+}
+
 function drawText(text, x, y, w, h, conf) {    
     g.fillStyle = conf.text_color;
     g.font = conf.text_font;
@@ -798,31 +820,11 @@ function onDraw() {
             break;
     }
     if(!gachaneitor_status.cover_shown) {
-        // Clear
-        g.fillStyle = "#000000";
-        g.beginPath();
-        g.arc(
+        drawBlade(
+            gachaneitor_status.blade_angle,
             g_config.cover_x + 0.5 * g_config.cover_width,
-            g_config.cover_y + 0.63 * g_config.cover_height,
-            0.3 * g_config.cover_height,
-            0, 2 * Math.PI);
-        g.fill();
-        
-        // Spiral
-        var centerx = g_config.cover_x + 0.5 * g_config.cover_width;
-        var centery = g_config.cover_y + 0.63 * g_config.cover_height;
-        g.moveTo(centerx, centery);
-        g.beginPath();
-        var angle;
-        for (i = 0; i < 600; i++) {
-            angle = 0.1 * i;
-            x = centerx + (1 * angle) * Math.cos(angle + gachaneitor_status.blade_angle);
-            y = centery + (0.8 * angle) * Math.sin(angle + gachaneitor_status.blade_angle);
-
-            g.lineTo(x, y);
-        }
-        g.strokeStyle = "#AAA";
-        g.stroke();
+            g_config.cover_y + 0.75 * g_config.cover_height,
+            0.15 * g_config.cover_height);
 
         if(gachaneitor_status.screen == SCREEN.PROGRAM && (gachaneitor_status.time[0] > 0 || gachaneitor_status.time[1] > 0)) {
             gachaneitor_status.blade_angle += 
