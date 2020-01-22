@@ -1,0 +1,45 @@
+[ SIMULADOR ]
+> Disponible en:
+	https://manjavacas.github.io/Procesadores-Lenguajes/simulator/gachaneitor.html
+
+> También es posible abrir el archivo simulator/gachaneitor.html
+
+
+[ CUP ]
+> Compilación:
+	make
+
+> Ejecutar con receta de ejemplo:
+	make run
+
+> Ejecutar solo el analizador léxico con receta de ejemplo:
+	make run-lexer
+
+> Ejecutar con receta errónea de ejemplo:
+	make error
+
+> Ejecutar solo el analizador léxico con receta errónea de ejemplo:
+	make error-lexer
+
+> Ejecutar con cualquier receta:
+	[WINDOWS] parse.bat ruta/a/la/receta.txt
+	[LINUX] ./parse.sh ruta/a/la/receta.txt
+
+> Limpiar archivos compilados:
+	make clean
+
+
+[ ANTLR ]
+> cd ANTLR
+
+> Compilación:
+	make
+
+> Ejecutar con receta de ejemplo:
+	make run
+
+> Ejecutar con receta de ejemplo e interfaz gráfica:
+	make run-gui
+
+> Limpiar archivos compilados:
+	make clean
